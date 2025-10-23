@@ -18,7 +18,7 @@ A Retrieval-Augmented Generation (RAG) system for sports injury prevention, cont
 │   ├── soccer/
 │   └── swimming/
 ├── paper_docling_processor.py  # PDF to Markdown converter
-├── new_vector_db_dump.sql      # Vector database dump
+├── new_vector_db_dump.sql.gz   # Compressed vector database dump (46MB)
 └── README.md
 ```
 
@@ -26,7 +26,14 @@ A Retrieval-Augmented Generation (RAG) system for sports injury prevention, cont
 
 ### 1. Database Setup
 
-Import the vector database dump to set up your database:
+First, decompress the database dump file:
+
+```bash
+# Decompress the SQL file
+gunzip new_vector_db_dump.sql.gz
+```
+
+Then import the vector database dump to set up your database:
 
 ```bash
 # For PostgreSQL
@@ -79,6 +86,9 @@ The processed Markdown files in `rag_papers_md/` can be used for:
 
 ### PostgreSQL
 ```bash
+# Decompress first
+gunzip new_vector_db_dump.sql.gz
+
 # Create database
 createdb sports_injury_rag
 
@@ -88,6 +98,9 @@ psql -U postgres -d sports_injury_rag -f new_vector_db_dump.sql
 
 ### MySQL
 ```bash
+# Decompress first
+gunzip new_vector_db_dump.sql.gz
+
 # Create database
 mysql -u root -p -e "CREATE DATABASE sports_injury_rag;"
 
