@@ -1,8 +1,3 @@
-Here’s a clean **English `README.md`** you can directly upload to GitHub.
-I’ve written it to match your file structure (with `api.txt`, SQL dump, requests JSON, and final retrieval Excel files), and structured it like a professional open-source project. ✅
-
----
-
 # 🏋️ Sports Injury RAG Retrieval
 
 This repository contains a **Retrieval-Augmented Generation (RAG)** retrieval pipeline based on **Elasticsearch vector search**.
