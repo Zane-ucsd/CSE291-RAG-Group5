@@ -9,7 +9,7 @@ We use a sports injury knowledge base (5 categories, 6000+ chunks from 119 PDFs)
 
 ```
 .
-├── api.txt                             # API commands for Elasticsearch authentication
+├── yours_api.txt                       # API for Elasticsearch and openai
 ├── body.json                           # curl command's body part to generate Elasticsearch API key
 ├── ES                                  # Jupyter experiments / setup
 ├── new_vector_db_dump_clean.sql        # Original data dump from PostgreSQL
