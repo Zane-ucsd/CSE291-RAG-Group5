@@ -25,14 +25,14 @@ PG_CONFIG: Dict[str, Any] = {
 
 # OpenAI Configuration (for embeddings)
 OPENAI_CONFIG: Dict[str, Any] = {
-    "api_key": os.getenv("OPENAI_API_KEY", "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"),
+    "api_key": os.getenv("OPENAI_API_KEY", " "),# Set your Openai API key
     "model": "text-embedding-3-small",
     "embedding_dim": 1536
 }
 
 # Gemini Configuration
 GEMINI_CONFIG: Dict[str, Any] = {
-    "api_key": os.getenv("GEMINI_API_KEY", "AIzaSyAldy4FVCdzhKsWqcxuodMVDCTUgVizksQ"),  # Set your Gemini API key
+    "api_key": os.getenv("GEMINI_API_KEY", " "),  # Set your Gemini API key
     "model": "gemini-2.0-flash",
     "temperature": 0.7,
     "max_output_tokens": 1000,
