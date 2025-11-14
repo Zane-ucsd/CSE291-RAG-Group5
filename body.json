@@ -1,0 +1,14 @@
+{
+  "name": "sports-kb-client",
+  "role_descriptors": {
+    "sports_kb_readwrite": {
+      "cluster": ["monitor"],
+      "index": [
+        {
+          "names": ["sports_kb"],
+          "privileges": ["read","write","create_index","view_index_metadata","delete_index"]
+        }
+      ]
+    }
+  }
+}

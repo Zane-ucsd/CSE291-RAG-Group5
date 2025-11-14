@@ -1,0 +1,5 @@
+ES-api:
+{"id":"QnbREpoBx8vU1yItlmkz","name":"sports-kb-client","api_key":"T4TzIbNwwlp_LsgNptb53g","encoded":"UW5iUkVwb0J4OHZVMXlJdGxta3o6VDRUekliTnd3bHBfTHNnTnB0YjUzZw=="}
+
+openai-api:
+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
