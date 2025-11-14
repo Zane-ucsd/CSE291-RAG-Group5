@@ -1,0 +1,8 @@
+elasticsearch>=8.0.0
+openai>=1.0.0
+psycopg2-binary>=2.9.0
+numpy>=1.24.0
+ujson>=5.0.0
+google-generativeai>=0.3.0
+sentence-transformers>=2.2.0
+

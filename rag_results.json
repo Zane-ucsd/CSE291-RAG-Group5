@@ -1,0 +1,88 @@
+[
+  {
+    "response": "The provided documents do not contain information about hamstring strains, their recognition, or how to determine their severity. Therefore, I cannot answer your question.\n",
+    "sources": [
+      "Knee pain and other running injuries - NHS.pdf",
+      "Knee pain and other running injuries - NHS.pdf",
+      "Knee pain and other running injuries - NHS.pdf",
+      "return-to-running.pdf",
+      "Knee pain and other running injuries - NHS.pdf",
+      "Knee pain and other running injuries - NHS.pdf",
+      "Knee pain and other running injuries - NHS.pdf",
+      "ijspt_2021_16_4_25754.pdf",
+      "running - How do I overcome this muscle _ knee pain_ - Physical Fitness Stack Exchange.pdf",
+      "Knee pain and other running injuries - NHS.pdf"
+    ],
+    "num_documents": 10,
+    "prompt_length": 3187,
+    "query": "An amateur footballer experienced sudden sharp pain in the back of the thigh while sprinting and could not continue running. Based on on-field signs and typical mechanisms, how to recognize a hamstring strain and decide if it’s mild or severe?",
+    "category": "Running",
+    "documents": [
+      {
+        "id": "2157",
+        "category": "running",
+        "source": "Knee pain and other running injuries - NHS.pdf",
+        "content": "To treat achilles pain at home, apply wrapped up ice to the area if you can feel a lump there (never put ice directly on your skin). You can also gently massage the area with your fingers. You could also try using heel wedges in your shoes. Get advice about this from a sports or running shop. See a GP or a physiotherapist if you have achilles pain that does not disappear after 2 to 3 weeks. If you have a sudden, sharp pain, your achilles tendon may have torn. See a GP straight away if this is the case. M",
+        "score": 30.60281,
+        "highlight": [
+          "<em>To</em> treat achilles <em>pain</em> at home, apply wrapped up ice <em>to</em> <em>the</em> area <em>if</em> you can feel <em>a</em> lump there (never",
+          "You <em>could</em> also try using heel wedges <em>in</em> your shoes.",
+          "Get advice about this from <em>a</em> sports <em>or</em> <em>running</em> shop.",
+          "See <em>a</em> GP <em>or</em> <em>a</em> physiotherapist <em>if</em> you have achilles <em>pain</em> that does <em>not</em> disappear after 2 <em>to</em> 3 weeks.",
+          "<em>If</em> you have <em>a</em> <em>sudden</em>, <em>sharp</em> <em>pain</em>, your achilles tendon may have torn."
+        ]
+      },
+      {
+        "id": "2158",
+        "category": "running",
+        "source": "Knee pain and other running injuries - NHS.pdf",
+        "content": "A sharp pain will stop you running altogether. Even if the pain is not severe, it's a good idea to rest until the pain goes, and get it checked if it does not go away.",
+        "score": 28.182003,
+        "highlight": [
+          "<em>A</em> <em>sharp</em> <em>pain</em> will stop you <em>running</em> altogether.",
+          "Even <em>if</em> <em>the</em> <em>pain</em> is <em>not</em> <em>severe</em>, it's <em>a</em> good idea <em>to</em> rest until <em>the</em> <em>pain</em> goes, <em>and</em> get it checked <em>if</em> it",
+          "does <em>not</em> go away."
+        ]
+      },
+      {
+        "id": "2156",
+        "category": "running",
+        "source": "Knee pain and other running injuries - NHS.pdf",
+        "content": "You may have pain and swelling at the back of the ankle or heel. The pain may be minor but continuous, or it could be sudden and sharp. It may be worse first thing in the morning.",
+        "score": 27.755632,
+        "highlight": [
+          "You may have <em>pain</em> <em>and</em> swelling at <em>the</em> <em>back</em> <em>of</em> <em>the</em> ankle <em>or</em> heel.",
+          "<em>The</em> <em>pain</em> may be minor but continuous, <em>or</em> it <em>could</em> be <em>sudden</em> <em>and</em> <em>sharp</em>.",
+          "It may be worse first thing <em>in</em> <em>the</em> morning."
+        ]
+      },
+      {
+        "id": "2259",
+        "category": "running",
+        "source": "return-to-running.pdf",
+        "content": "- Running Warmup: A dynamic warmup and 3-5-minute walk should precede each run - Running Frequency: - Every other day (increase rest days as needed) - Each level should be completed 3 times without pain prior to moving on to next level; repeat sequence as needed. - Running Intensity: Run at a conversation pace or 50-60% of your maximum heart rate. - Pain/Soreness: - If pain is not sharp, is present during warmup, but improves with running, or does not increase when running, the patient may continue to run but stay at that level until pain-free. - If pain increases as you run, creates soreness that disrupts sleep or rest, causes joint effusion or alters mechanics, stop running and take additional days off until pain resolves. - Consult with your physical therapist throughout return to running process for individualized recommendations. Running program is completed in addition to rehab program and other cardiovascular exercise, continue to sprint progression or progression per treating therapist. | | Successful Times Completed | Run | Walk | Reps | |---------|-------------------------------------|------------------------|-----------|--------| | Level 1 | 1. ________ 2. ________ 3. ________ | 3 minutes | 4 minutes | 3x | | Level 2 | 1. ________ 2. ________ 3. ________ | 4 minutes | 3 minutes | 3x | | Level 3 | 1. ________ 2. ________ 3. ________ | 6 minutes | 3 minutes | 3x | | Level 4 | 1. ________ 2. ________ 3. ________ | 8-10 minutes or 1 mile | 2 minutes | 2x |",
+        "score": 27.545256,
+        "highlight": [
+          "- <em>Running</em> Warmup: <em>A</em> dynamic warmup <em>and</em> 3-5-minute walk should precede each run - <em>Running</em> Frequency: -",
+          "prior <em>to</em> moving <em>on</em> <em>to</em> next level; repeat sequence as needed. - <em>Running</em> Intensity: Run at <em>a</em> conversation",
+          "pace <em>or</em> 50-60% <em>of</em> your maximum heart rate. - <em>Pain</em>/Soreness: - <em>If</em> <em>pain</em> is <em>not</em> <em>sharp</em>, is present during",
+          "warmup, but improves with <em>running</em>, <em>or</em> does <em>not</em> increase when <em>running</em>, <em>the</em> patient may <em>continue</em> <em>to</em> run",
+          "<em>Running</em> program is completed <em>in</em> addition <em>to</em> rehab program <em>and</em> other cardiovascular exercise, <em>continue</em>"
+        ]
+      },
+      {
+        "id": "2154",
+        "category": "running",
+        "source": "Knee pain and other running injuries - NHS.pdf",
+        "content": "Do not run if you have pain in your knee. If you still feel pain after a week's rest, see a GP or physiotherapist. How soon you can start running again will depend on the cause of your knee pain and how severe it is. A GP or physiotherapist can advise you. Try these knee exercises for runners (Link: www.nhs.uk/live-well/exercise/knee-exercises-for-runners/).",
+        "score": 27.263205,
+        "highlight": [
+          "Do <em>not</em> run <em>if</em> you have <em>pain</em> <em>in</em> your knee.",
+          "<em>If</em> you still feel <em>pain</em> after <em>a</em> week's rest, see <em>a</em> GP <em>or</em> physiotherapist.",
+          "<em>How</em> soon you can start <em>running</em> again will depend <em>on</em> <em>the</em> cause <em>of</em> your knee <em>pain</em> <em>and</em> <em>how</em> <em>severe</em> it is.",
+          "<em>A</em> GP <em>or</em> physiotherapist can advise you."
+        ]
+      }
+    ]
+  }
+]
