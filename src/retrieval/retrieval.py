@@ -5,8 +5,8 @@ Handles vector search and hybrid search in Elasticsearch.
 
 from typing import List, Dict, Any, Optional
 from elasticsearch import Elasticsearch
-import config
-import utils
+from ..config import ES_CONFIG, RETRIEVAL_CONFIG
+from ..utils import normalize_category
 
 
 class Retriever:
@@ -21,17 +21,17 @@ class Retriever:
         Args:
             es_config: Elasticsearch configuration (defaults to config.ES_CONFIG)
         """
-        es_config = es_config or config.ES_CONFIG
+        es_config = es_config or ES_CONFIG
         self.es = Elasticsearch(
             es_config["host"],
             api_key=es_config["api_key"],
             ca_certs=es_config["ca_certs"]
         )
         self.index_name = es_config["index_name"]
-        self.top_k = config.RETRIEVAL_CONFIG["top_k"]
-        self.num_candidates = config.RETRIEVAL_CONFIG["num_candidates"]
-        self.use_hybrid = config.RETRIEVAL_CONFIG["use_hybrid"]
-        self.category_filter = config.RETRIEVAL_CONFIG["category_filter"]
+        self.top_k = RETRIEVAL_CONFIG["top_k"]
+        self.num_candidates = RETRIEVAL_CONFIG["num_candidates"]
+        self.use_hybrid = RETRIEVAL_CONFIG["use_hybrid"]
+        self.category_filter = RETRIEVAL_CONFIG["category_filter"]
     
     def vector_search(
         self,
@@ -63,7 +63,7 @@ class Retriever:
         # Build filters
         filters = []
         if category and self.category_filter:
-            category = utils.normalize_category(category)
+            category = normalize_category(category)
             filters.append({"term": {"category": category}})
         
         # Build KNN query
@@ -128,7 +128,7 @@ class Retriever:
         # Build filters
         filters = []
         if category and self.category_filter:
-            category = utils.normalize_category(category)
+            category = normalize_category(category)
             filters.append({"term": {"category": category}})
         
         # Build combined query
