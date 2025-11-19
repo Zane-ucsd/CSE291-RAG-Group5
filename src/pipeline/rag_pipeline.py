@@ -4,12 +4,12 @@ Integrates all components for end-to-end RAG processing.
 """
 
 from typing import Dict, Any, Optional, List
-import config
-import utils
-from embedding import EmbeddingGenerator
-from retrieval import Retriever
-from reranking import Reranker
-from generation import GeminiGenerator
+from ..config import RETRIEVAL_CONFIG, RERANKING_CONFIG
+from ..utils import classify_sport_category
+from ..embedding import EmbeddingGenerator
+from ..retrieval import Retriever
+from ..reranking import Reranker
+from ..generation import GeminiGenerator
 
 
 class RAGPipeline:
@@ -55,22 +55,27 @@ class RAGPipeline:
         
         Args:
             query_text: User query text
-            top_k: Number of documents to retrieve
-            rerank_top_k: Number of documents to return after reranking
+            top_k: Number of documents to retrieve (defaults to RETRIEVAL_CONFIG["top_k"])
+            rerank_top_k: Number of documents to return after reranking (defaults to RERANKING_CONFIG["rerank_top_k"])
             category: Optional category filter
             
         Returns:
             Dictionary with 'response', 'sources', 'documents', and metadata
         """
+        # Use config defaults if not specified
+        top_k = top_k or RETRIEVAL_CONFIG["top_k"]
+        rerank_top_k = rerank_top_k or RERANKING_CONFIG["rerank_top_k"]
+        
         # Step 1: Generate query embedding
         print(f"\n🔍 Processing query: {query_text[:100]}...")
         query_embedding = self.embedding_gen.generate_embedding(query_text)
         print("✅ Query embedding generated")
         
         # Step 2: Classify category if not provided
-        if category is None and config.RETRIEVAL_CONFIG["category_filter"]:
-            category = utils.classify_sport_category(query_text)
-            print(f"📂 Detected category: {category}")
+        if category is None and RETRIEVAL_CONFIG["category_filter"]:
+            category = classify_sport_category(query_text)
+            if category:
+                print(f"📂 Detected category: {category}")
         
         # Step 3: Retrieve documents
         print("🔎 Retrieving documents...")
@@ -97,7 +102,7 @@ class RAGPipeline:
         # Add metadata
         result["query"] = query_text
         result["category"] = category
-        result["documents"] = documents[:5]  # Include top 5 documents in result
+        result["documents"] = documents  # Include all documents in result (not just top 5)
         
         return result
     
@@ -113,18 +118,22 @@ class RAGPipeline:
         
         Args:
             query_text: User query text
-            top_k: Number of documents to retrieve
-            rerank_top_k: Number of documents to return after reranking
+            top_k: Number of documents to retrieve (defaults to RETRIEVAL_CONFIG["top_k"])
+            rerank_top_k: Number of documents to return after reranking (defaults to RERANKING_CONFIG["rerank_top_k"])
             category: Optional category filter
             
         Yields:
             Response chunks
         """
+        # Use config defaults if not specified
+        top_k = top_k or RETRIEVAL_CONFIG["top_k"]
+        rerank_top_k = rerank_top_k or RERANKING_CONFIG["rerank_top_k"]
+        
         # Steps 1-4: Same as query()
         query_embedding = self.embedding_gen.generate_embedding(query_text)
         
-        if category is None and config.RETRIEVAL_CONFIG["category_filter"]:
-            category = utils.classify_sport_category(query_text)
+        if category is None and RETRIEVAL_CONFIG["category_filter"]:
+            category = classify_sport_category(query_text)
         
         hits = self.retriever.search(
             query_vector=query_embedding,
@@ -152,9 +161,9 @@ class RAGPipeline:
             "reranking_enabled": self.reranker.enabled,
             "hybrid_search_enabled": self.retriever.use_hybrid,
             "category_filter_enabled": self.retriever.category_filter,
-            "default_top_k": config.RETRIEVAL_CONFIG["top_k"],
-            "default_rerank_top_k": config.RERANKING_CONFIG["rerank_top_k"],
-            "embedding_model": config.OPENAI_CONFIG["model"],
-            "generation_model": config.GEMINI_CONFIG["model"]
+            "default_top_k": RETRIEVAL_CONFIG["top_k"],
+            "default_rerank_top_k": RERANKING_CONFIG["rerank_top_k"],
+            "embedding_model": "text-embedding-3-small",  # From OPENAI_CONFIG
+            "generation_model": "gemini-2.0-flash"  # From GEMINI_CONFIG
         }
 

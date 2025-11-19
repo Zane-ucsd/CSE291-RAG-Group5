@@ -5,8 +5,8 @@ Handles prompt construction and Gemini API calls.
 
 from typing import List, Dict, Any, Optional
 import google.generativeai as genai
-import config
-import utils
+from ..config import GEMINI_CONFIG, PROMPT_CONFIG
+from ..utils import format_context_documents
 
 
 class GeminiGenerator:
@@ -22,12 +22,12 @@ class GeminiGenerator:
             api_key: Gemini API key (defaults to config)
             model: Gemini model name (defaults to config)
         """
-        self.api_key = api_key or config.GEMINI_CONFIG["api_key"]
-        self.model_name = model or config.GEMINI_CONFIG["model"]
-        self.temperature = config.GEMINI_CONFIG["temperature"]
-        self.max_output_tokens = config.GEMINI_CONFIG["max_output_tokens"]
-        self.top_p = config.GEMINI_CONFIG["top_p"]
-        self.top_k = config.GEMINI_CONFIG["top_k"]
+        self.api_key = api_key or GEMINI_CONFIG["api_key"]
+        self.model_name = model or GEMINI_CONFIG["model"]
+        self.temperature = GEMINI_CONFIG["temperature"]
+        self.max_output_tokens = GEMINI_CONFIG["max_output_tokens"]
+        self.top_p = GEMINI_CONFIG["top_p"]
+        self.top_k = GEMINI_CONFIG["top_k"]
         
         if not self.api_key:
             raise ValueError("Gemini API key not found. Set GEMINI_API_KEY environment variable or update config.py")
@@ -55,11 +55,17 @@ class GeminiGenerator:
         Returns:
             Formatted prompt string
         """
-        system_instruction = system_instruction or config.PROMPT_CONFIG["system_instruction"]
-        max_context_length = max_context_length or config.PROMPT_CONFIG["max_context_length"]
+        system_instruction = system_instruction or PROMPT_CONFIG["system_instruction"]
+        max_context_length = max_context_length or PROMPT_CONFIG["max_context_length"]
         
         # Format context documents
-        context = utils.format_context_documents(documents, max_length=max_context_length)
+        # Use truncate_per_doc=True when we have many documents (>=10) to include more documents
+        truncate_per_doc = len(documents) >= 10
+        context = format_context_documents(
+            documents, 
+            max_length=max_context_length,
+            truncate_per_doc=truncate_per_doc
+        )
         
         # Build prompt
         prompt = f"""{system_instruction}
@@ -119,7 +125,7 @@ Answer based on the context documents above. """
             
             # Extract sources if available
             sources = []
-            if config.PROMPT_CONFIG["include_sources"]:
+            if PROMPT_CONFIG["include_sources"]:
                 sources = [doc.get("source", "Unknown") for doc in documents]
             
             return {
@@ -130,11 +136,19 @@ Answer based on the context documents above. """
             }
         
         except Exception as e:
+            error_msg = str(e)
+            # Identify error source
+            if "403" in error_msg or "API key" in error_msg or "leaked" in error_msg.lower():
+                error_source = "Google Gemini API"
+            else:
+                error_source = "Unknown"
+            
             return {
-                "response": f"Error generating response: {str(e)}",
+                "response": f"Error generating response ({error_source}): {error_msg}",
                 "sources": [],
                 "num_documents": len(documents),
-                "error": str(e)
+                "error": error_msg,
+                "error_source": error_source
             }
     
     def generate_stream(

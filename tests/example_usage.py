@@ -3,7 +3,13 @@ Example usage of RAG Pipeline.
 Demonstrates different ways to use the pipeline.
 """
 
-from rag_pipeline import RAGPipeline
+import sys
+from pathlib import Path
+
+# Add src to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from src.pipeline import RAGPipeline
 
 
 def example_basic_query():

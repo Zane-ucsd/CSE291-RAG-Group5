@@ -25,14 +25,14 @@ PG_CONFIG: Dict[str, Any] = {
 
 # OpenAI Configuration (for embeddings)
 OPENAI_CONFIG: Dict[str, Any] = {
-    "api_key": os.getenv("OPENAI_API_KEY", " "),# Set your Openai API key
+    "api_key": os.getenv("OPENAI_API_KEY", ""),# Set your Openai API key
     "model": "text-embedding-3-small",
     "embedding_dim": 1536
 }
 
 # Gemini Configuration
 GEMINI_CONFIG: Dict[str, Any] = {
-    "api_key": os.getenv("GEMINI_API_KEY", " "),  # Set your Gemini API key
+    "api_key": os.getenv("GEMINI_API_KEY", ""),  # Set your Gemini API key
     "model": "gemini-2.0-flash",
     "temperature": 0.7,
     "max_output_tokens": 1000,
@@ -51,7 +51,7 @@ RETRIEVAL_CONFIG: Dict[str, Any] = {
 # Reranking Configuration
 RERANKING_CONFIG: Dict[str, Any] = {
     "enabled": True,
-    "rerank_top_k": 5,  # Number of documents to rerank
+    "rerank_top_k": 10,  # Number of documents to rerank
     "model_name": "BAAI/bge-reranker-base",  # Cross-encoder model
     "device": "cpu"  # "cpu" or "cuda"
 }
@@ -61,7 +61,7 @@ PROMPT_CONFIG: Dict[str, Any] = {
     "system_instruction": """You are a helpful assistant specialized in sports injury knowledge. 
 Answer questions based on the provided context documents. If the context doesn't contain enough information, 
 say so clearly. Always cite relevant information from the context when possible.""",
-    "max_context_length": 3000,  # Maximum characters from retrieved documents
+    "max_context_length": 8000,  # Maximum characters from retrieved documents
     "include_sources": True  # Include source information in the response
 }
 

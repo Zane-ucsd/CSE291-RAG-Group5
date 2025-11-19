@@ -7,7 +7,7 @@ import os
 import numpy as np
 from typing import List, Union, Optional
 from openai import OpenAI
-import config
+from ..config import OPENAI_CONFIG
 
 
 class EmbeddingGenerator:
@@ -23,10 +23,10 @@ class EmbeddingGenerator:
             api_key: OpenAI API key (defaults to config)
             model: Embedding model name (defaults to config)
         """
-        self.api_key = api_key or config.OPENAI_CONFIG["api_key"]
-        self.model = model or config.OPENAI_CONFIG["model"]
+        self.api_key = api_key or OPENAI_CONFIG["api_key"]
+        self.model = model or OPENAI_CONFIG["model"]
         self.client = OpenAI(api_key=self.api_key)
-        self.embedding_dim = config.OPENAI_CONFIG["embedding_dim"]
+        self.embedding_dim = OPENAI_CONFIG["embedding_dim"]
     
     def generate_embedding(self, text: Union[str, List[str]], normalize: bool = True) -> Union[List[float], List[List[float]]]:
         """

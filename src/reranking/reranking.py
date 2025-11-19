@@ -4,7 +4,7 @@ Re-ranks retrieved documents using cross-encoder models.
 """
 
 from typing import List, Dict, Any, Optional, Tuple
-import config
+from ..config import RERANKING_CONFIG
 
 
 class Reranker:
@@ -26,10 +26,10 @@ class Reranker:
             device: Device to use ("cpu" or "cuda")
             enabled: Whether reranking is enabled
         """
-        self.enabled = enabled if enabled is not None else config.RERANKING_CONFIG["enabled"]
-        self.model_name = model_name or config.RERANKING_CONFIG["model_name"]
-        self.device = device or config.RERANKING_CONFIG["device"]
-        self.rerank_top_k = config.RERANKING_CONFIG["rerank_top_k"]
+        self.enabled = enabled if enabled is not None else RERANKING_CONFIG["enabled"]
+        self.model_name = model_name or RERANKING_CONFIG["model_name"]
+        self.device = device or RERANKING_CONFIG["device"]
+        self.rerank_top_k = RERANKING_CONFIG["rerank_top_k"]
         
         self.model = None
         self.tokenizer = None

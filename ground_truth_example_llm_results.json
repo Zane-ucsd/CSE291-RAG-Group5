@@ -1,0 +1,170 @@
+[
+  {
+    "entry": 0,
+    "query": "What rehabilitation methods are most effective for treating knee injuries in badminton players?",
+    "result": {
+      "valid": true,
+      "response_length": 1902,
+      "response_preview": "Several rehabilitation methods have been found effective for treating knee injuries in badminton players:\n\n*   **Physical Therapy:** Specialized exercises to improve strength, flexibility, and balance...",
+      "documents_used": 58,
+      "documents_requested": 58,
+      "issues": [],
+      "has_error": null,
+      "error": null
+    }
+  },
+  {
+    "entry": 1,
+    "query": "What preventive strategies are most effective in reducing the incidence of common injuries among badminton players, and how can these be tailored to different player levels and playing styles?",
+    "result": {
+      "valid": true,
+      "response_length": 3359,
+      "response_preview": "Effective preventive strategies for reducing common badminton injuries include:\n\n*   **Proper Warm-up and Cool-down:** A thorough warm-up before training or competition and an adequate cool-down proce...",
+      "documents_used": 29,
+      "documents_requested": 29,
+      "issues": [],
+      "has_error": null,
+      "error": null
+    }
+  },
+  {
+    "entry": 2,
+    "query": "What are the key factors that influence the recovery time and long-term performance of badminton players after common musculoskeletal injuries?",
+    "result": {
+      "valid": true,
+      "response_length": 4339,
+      "response_preview": "Several key factors influence the recovery time and long-term performance of badminton players after musculoskeletal injuries:\n\n*   **Severity of Injury and Individual Physical Condition:** A customiz...",
+      "documents_used": 47,
+      "documents_requested": 47,
+      "issues": [],
+      "has_error": null,
+      "error": null
+    }
+  },
+  {
+    "entry": 3,
+    "query": "Summarize the risk factors for low-back pain in professional cyclists and preventive core exercises supported by evidence.",
+    "result": {
+      "valid": true,
+      "response_length": 169,
+      "response_preview": "The provided documents do not contain information about the risk factors for low-back pain in professional cyclists and preventive core exercises supported by evidence.\n",
+      "documents_used": 17,
+      "documents_requested": 17,
+      "issues": [],
+      "has_error": null,
+      "error": null
+    }
+  },
+  {
+    "entry": 4,
+    "query": "What is runner's knee?",
+    "result": {
+      "valid": true,
+      "response_length": 422,
+      "response_preview": "Runner's Knee, also known as Patellofemoral Pain Syndrome (PFPS), is a spectrum of disorders that cause pain around the anterior part of the knee (Document 2). It is a common ailment among athletes, e...",
+      "documents_used": 3,
+      "documents_requested": 3,
+      "issues": [],
+      "has_error": null,
+      "error": null
+    }
+  },
+  {
+    "entry": 5,
+    "query": "How do different types of running shoes (minimalist vs. cushioned) affect tibial stress and injury risk?",
+    "result": {
+      "valid": true,
+      "response_length": 818,
+      "response_preview": "Minimalist footwear is associated with a significantly greater risk of tibial stress fractures compared to maximal running shoes (Document 1). This increased risk is linked to greater tibial strains a...",
+      "documents_used": 4,
+      "documents_requested": 4,
+      "issues": [],
+      "has_error": null,
+      "error": null
+    }
+  },
+  {
+    "entry": 6,
+    "query": "An amateur footballer experienced sudden sharp pain in the back of the thigh while sprinting and could not continue running. Based on on-field signs and typical mechanisms, how to recognize a hamstring strain and decide if it's mild or severe?",
+    "result": {
+      "valid": true,
+      "response_length": 3121,
+      "response_preview": "Based on the provided documents, here's how to recognize a hamstring strain and differentiate between mild and severe cases in an amateur footballer experiencing sudden thigh pain while sprinting:\n\n**...",
+      "documents_used": 11,
+      "documents_requested": 11,
+      "issues": [],
+      "has_error": null,
+      "error": null
+    }
+  },
+  {
+    "entry": 7,
+    "query": "I want to reduce injury risk through warm-up routines. What are the most effective warm-up exercises or programs I can implement each week?",
+    "result": {
+      "valid": true,
+      "response_length": 2627,
+      "response_preview": "To reduce injury risk through warm-up routines, consider the following:\n\n*   **Neuromuscular Training (NMT):** NMT programs, especially the FIFA 11+, are effective in reducing lower limb injury incide...",
+      "documents_used": 40,
+      "documents_requested": 40,
+      "issues": [],
+      "has_error": null,
+      "error": null
+    }
+  },
+  {
+    "entry": 8,
+    "query": "Our team increased training intensity recently. How can I monitor whether players are at higher risk of injury?",
+    "result": {
+      "valid": true,
+      "response_length": 2676,
+      "response_preview": "Based on the provided documents, here's how you can monitor your players for a higher risk of injury after increasing training intensity:\n\n1.  **Monitor the Acute:Chronic Workload Ratio (ACWR):**\n    ...",
+      "documents_used": 10,
+      "documents_requested": 10,
+      "issues": [],
+      "has_error": null,
+      "error": null
+    }
+  },
+  {
+    "entry": 9,
+    "query": "Why do breaststroke and freestyle put stress on different body parts, and what drills help protect the knees and lower back?",
+    "result": {
+      "valid": true,
+      "response_length": 1928,
+      "response_preview": "The breaststroke and freestyle strokes place stress on different body parts due to their unique biomechanical demands.\n\n*   **Breaststroke:** This stroke is associated with knee injuries due to the ro...",
+      "documents_used": 25,
+      "documents_requested": 25,
+      "issues": [],
+      "has_error": null,
+      "error": null
+    }
+  },
+  {
+    "entry": 10,
+    "query": "What are the best rehab or strengthening exercises for swimmers coming back from shoulder or back injuries?",
+    "result": {
+      "valid": true,
+      "response_length": 892,
+      "response_preview": "The documents provide some information on strengthening exercises and rehabilitation for swimmers with shoulder and back injuries:\n\n*   **Shoulder:** Dryland training is an important part of strengthe...",
+      "documents_used": 28,
+      "documents_requested": 28,
+      "issues": [],
+      "has_error": null,
+      "error": null
+    }
+  },
+  {
+    "entry": 11,
+    "query": "Why do female swimmers get injured more often, and what can they do in training or nutrition to lower that risk?",
+    "result": {
+      "valid": true,
+      "response_length": 2731,
+      "response_preview": "Female swimmers experience a higher incidence of injuries compared to their male counterparts due to a combination of factors including biomechanical differences, hormonal influences, and the prevalen...",
+      "documents_used": 13,
+      "documents_requested": 13,
+      "issues": [],
+      "has_error": null,
+      "error": null
+    }
+  }
+]

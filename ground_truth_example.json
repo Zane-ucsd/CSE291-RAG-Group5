@@ -1,0 +1,55 @@
+[
+  {
+    "query": "What rehabilitation methods are most effective for treating knee injuries in badminton players?",
+    "relevant_ids": ["394", "440", "180", "19", "174", "198", "383", "388", "451", "452", "457", "4", "47", "51", "172", "181", "229", "232", "267", "356", "368", "377", "393", "395", "396", "398", "399", "400", "448", "453", "3", "17", "111", "173", "177", "186", "187", "197", "200", "201", "202", "203", "223", "254", "269", "279", "331", "362", "367", "371", "373", "444", "446", "449", "491", "501", "510", "520"]
+  },
+  {
+    "query": "What preventive strategies are most effective in reducing the incidence of common injuries among badminton players, and how can these be tailored to different player levels and playing styles?",
+    "relevant_ids": ["51", "383", "387", "333", "342", "400", "172", "279", "329", "388", "395", "396", "399", "436", "101", "168", "170", "171", "254", "269", "293", "305", "344", "348", "356", "360", "405", "431", "512"]
+  },
+  {
+    "query": "What are the key factors that influence the recovery time and long-term performance of badminton players after common musculoskeletal injuries?",
+    "relevant_ids": ["374", "377", "17", "368", "2", "51", "63", "73", "101", "283", "319", "321", "323", "356", "383", "4", "18", "19", "21", "47", "48", "67", "80", "95", "172", "229", "250", "252", "253", "254", "259", "268", "269", "294", "322", "333", "358", "360", "362", "378", "382", "384", "385", "400", "409", "414", "430"]
+  },
+  {
+    "query": "Summarize the risk factors for low-back pain in professional cyclists and preventive core exercises supported by evidence.",
+    "relevant_ids": ["947", "961", "1689", "1690", "869", "870", "848", "850", "934", "951", "1692", "872", "1263", "893", "1124", "1146", "962"]
+  },
+  {
+    "query": "What is runner's knee?",
+    "relevant_ids": ["2181","2459","2457"]
+  },
+  {
+    "query": "How do different types of running shoes (minimalist vs. cushioned) affect tibial stress and injury risk?",
+    "relevant_ids": ["2010","2497","2498","2366"]
+  },
+  {
+    "query": "An amateur footballer experienced sudden sharp pain in the back of the thigh while sprinting and could not continue running. Based on on-field signs and typical mechanisms, how to recognize a hamstring strain and decide if it's mild or severe?",
+    "relevant_ids": ["2166", "3046", "3193", "3196", "3195", "3199", "3208", "3431", "3484", "3568", "4379"]
+  },
+  {
+    "query": "I want to reduce injury risk through warm-up routines. What are the most effective warm-up exercises or programs I can implement each week?",
+    "relevant_ids": ["4013", "4016", "4042", "4049", "4050", "2903", "2905", "2906", "3288", "3291", "3301","3314", "3315", "4053", "4054", "4056", "4059", "4060", "4064", "4065", "2823", "2824", "2826", "2827", "2828", "2832", "2833", "2839", "2835", "2836", "2840", "3599", "3601", "3602", "3603", "3604", "3605", "4116", "3486", "3390"]
+  },
+  {
+    "query": "Our team increased training intensity recently. How can I monitor whether players are at higher risk of injury?",
+    "relevant_ids": ["3511", "3530", "3533", "3760", "3781", "3796", "3798", "3799", "3801", "2886"]
+  },
+      {
+    "query": "Why do breaststroke and freestyle put stress on different body parts, and what drills help protect the knees and lower back?",
+    "relevant_ids": ["4417", "4970", "4984", "4991",
+"5059", "5060", "5061","5062", "5402", "5447", "5460", "5463",
+"5467", "5469", "5476", "5478", "5490", "5493", "5496", "5498", "5500",
+"5515", "5516", "5520", "5521"  ]
+  },
+  {
+    "query": "What are the best rehab or strengthening exercises for swimmers coming back from shoulder or back injuries?",
+    "relevant_ids": ["5053", "5054", "5055", "5056", "5059", "5060",
+"5061", "5062", "5064", "5402", "5460", "5463", "5467", "5469", "5476", "5478", "5483", "5484", "5485", "5490", "5493", "5496", "5498", "5500",
+"5515", "5516", "5520", "5521"]
+  },
+  {
+    "query": "Why do female swimmers get injured more often, and what can they do in training or nutrition to lower that risk?",
+    "relevant_ids": ["4332","4386", "4388", "4390", "4413", "4414", "4415", "4416", "4420", "4993", "4998", "5293", "5532"]
+  }
+]
