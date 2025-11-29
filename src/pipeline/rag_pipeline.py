@@ -32,7 +32,11 @@ class RAGPipeline:
         # Initialize components
         self.embedding_gen = EmbeddingGenerator()
         self.retriever = Retriever()
-        self.reranker = Reranker(enabled=use_reranking)
+        self.reranker = Reranker(
+            enabled=use_reranking,
+            use_domain_filter=RERANKING_CONFIG.get("use_domain_filter", False),
+            alpha=RERANKING_CONFIG.get("alpha", 1.0)
+        )
         self.generator = GeminiGenerator()
         
         # Override config if specified
