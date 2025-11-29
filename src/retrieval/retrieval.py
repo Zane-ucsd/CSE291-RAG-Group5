@@ -22,11 +22,17 @@ class Retriever:
             es_config: Elasticsearch configuration (defaults to config.ES_CONFIG)
         """
         es_config = es_config or ES_CONFIG
-        self.es = Elasticsearch(
-            es_config["host"],
-            api_key=es_config["api_key"],
-            ca_certs=es_config["ca_certs"]
-        )
+        
+        # Build connection parameters
+        es_params = {"hosts": [es_config["host"]]}
+        
+        # Add optional auth parameters if present
+        if "api_key" in es_config:
+            es_params["api_key"] = es_config["api_key"]
+        if "ca_certs" in es_config:
+            es_params["ca_certs"] = es_config["ca_certs"]
+        
+        self.es = Elasticsearch(**es_params)
         self.index_name = es_config["index_name"]
         self.top_k = RETRIEVAL_CONFIG["top_k"]
         self.num_candidates = RETRIEVAL_CONFIG["num_candidates"]
@@ -42,7 +48,7 @@ class Retriever:
         source_fields: Optional[List[str]] = None
     ) -> List[Dict[str, Any]]:
         """
-        Perform vector similarity search (KNN).
+        Perform vector similarity search using knn (ES 8.x optimized).
         
         Args:
             query_vector: Query embedding vector
@@ -66,7 +72,7 @@ class Retriever:
             category = normalize_category(category)
             filters.append({"term": {"category": category}})
         
-        # Build KNN query
+        # Build KNN query (ES 8.x)
         knn_query = {
             "field": "embedding",
             "query_vector": query_vector,
@@ -97,7 +103,8 @@ class Retriever:
         source_fields: Optional[List[str]] = None
     ) -> List[Dict[str, Any]]:
         """
-        Perform hybrid search (vector + BM25 keyword search).
+        Perform hybrid search (vector + BM25 keyword search) for ES 8.x.
+        Uses native knn with query combination for optimal performance.
         
         Args:
             query_vector: Query embedding vector
@@ -108,7 +115,7 @@ class Retriever:
             source_fields: Fields to return in results
             
         Returns:
-            List of search results
+            List of search results with combined scores
         """
         if source_fields is None:
             source_fields = ["id", "category", "source", "content"]
@@ -144,7 +151,7 @@ class Retriever:
             "num_candidates": num_candidates
         }
         
-        # Execute hybrid search
+        # Execute hybrid search (ES 8.x native support)
         resp = self.es.search(
             index=self.index_name,
             size=k,

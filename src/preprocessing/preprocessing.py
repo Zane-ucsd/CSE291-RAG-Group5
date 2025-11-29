@@ -4,7 +4,8 @@ Handles data preprocessing and database operations.
 Includes PDF processing, text chunking, and database/Elasticsearch operations.
 """
 
-from typing import List, Dict, Any, Optional, Tuple
+from __future__ import annotations
+from typing import List, Dict, Any, Optional, Tuple, TYPE_CHECKING
 from pathlib import Path
 import psycopg2
 from psycopg2 import sql
@@ -69,11 +70,16 @@ class DataPreprocessor:
         Returns:
             Elasticsearch client
         """
-        return Elasticsearch(
-            self.es_config["host"],
-            api_key=self.es_config["api_key"],
-            ca_certs=self.es_config["ca_certs"]
-        )
+        # Build connection parameters
+        es_params = {"hosts": [self.es_config["host"]]}
+        
+        # Add optional auth parameters if present
+        if "api_key" in self.es_config:
+            es_params["api_key"] = self.es_config["api_key"]
+        if "ca_certs" in self.es_config:
+            es_params["ca_certs"] = self.es_config["ca_certs"]
+        
+        return Elasticsearch(**es_params)
     
     def create_es_index(self, index_name: Optional[str] = None, force_recreate: bool = False):
         """

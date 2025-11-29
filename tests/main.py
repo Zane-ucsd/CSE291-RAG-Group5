@@ -32,7 +32,7 @@ def main():
         "An amateur footballer experienced sudden sharp pain in the back of the thigh while sprinting and could not continue running. Based on on-field signs and typical mechanisms, how to recognize a hamstring strain and decide if it's mild or severe?",
         "I want to reduce injury risk through warm-up routines. What are the most effective warm-up exercises or programs I can implement each week?",
         "Our team increased training intensity recently. How can I monitor whether players are at higher risk of injury?",
-        "Why do breaststroke and freestyle put stress on different body parts, and what drills help protect the knees and lower back?",
+        "Why do breaststroke and freestyle put stress on different body parts?",
         "What are the best rehab or strengthening exercises for swimmers coming back from shoulder or back injuries?",
         "Why do female swimmers get injured more often, and what can they do in training or nutrition to lower that risk?"
     ]
