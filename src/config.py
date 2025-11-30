@@ -51,9 +51,12 @@ RETRIEVAL_CONFIG: Dict[str, Any] = {
 # Reranking Configuration
 RERANKING_CONFIG: Dict[str, Any] = {
     "enabled": True,
-    "rerank_top_k": 10,  # Number of documents to rerank
+    "rerank_top_k": 10,  # Number of documents to return after reranking
     "model_name": "BAAI/bge-reranker-base",  # Cross-encoder model
-    "device": "cpu"  # "cpu" or "cuda"
+    "device": "cpu",  # "cpu" or "cuda"
+    "use_domain_filter": False,  # Enable sports-aware domain filtering
+    "alpha": 1.0,  # Score fusion weight (1.0 = pure CE, 0.7 = 70% CE + 30% original)
+    "batch_size": 32  # Batch size for cross-encoder predictions
 }
 
 # Prompt Template Configuration
