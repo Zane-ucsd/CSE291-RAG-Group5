@@ -52,7 +52,8 @@ class RAGPipeline:
         query_text: str,
         top_k: Optional[int] = None,
         rerank_top_k: Optional[int] = None,
-        category: Optional[str] = None
+        category: Optional[str] = None,
+        return_pre_rerank: bool = False
     ) -> Dict[str, Any]:
         """
         Process a query through the complete RAG pipeline.
@@ -62,9 +63,11 @@ class RAGPipeline:
             top_k: Number of documents to retrieve (defaults to RETRIEVAL_CONFIG["top_k"])
             rerank_top_k: Number of documents to return after reranking (defaults to RERANKING_CONFIG["rerank_top_k"])
             category: Optional category filter
+            return_pre_rerank: Whether to include pre-rerank documents in result (for evaluation)
             
         Returns:
             Dictionary with 'response', 'sources', 'documents', and metadata
+            If return_pre_rerank=True, also includes 'pre_rerank_documents'
         """
         # Use config defaults if not specified
         top_k = top_k or RETRIEVAL_CONFIG["top_k"]
@@ -92,13 +95,19 @@ class RAGPipeline:
         documents = self.retriever.format_results(hits)
         print(f"✅ Retrieved {len(documents)} documents")
         
-        # Step 4: Rerank documents (if enabled)
+        # Step 4: Store pre-rerank documents if needed (for evaluation)
+        pre_rerank_documents = None
+        if return_pre_rerank:
+            import copy
+            pre_rerank_documents = copy.deepcopy(documents)
+        
+        # Step 5: Rerank documents (if enabled)
         if self.reranker.enabled and len(documents) > 0:
             print("🔄 Reranking documents...")
             documents = self.reranker.rerank(query_text, documents, top_k=rerank_top_k)
             print(f"✅ Reranked to top {len(documents)} documents")
         
-        # Step 5: Generate response
+        # Step 6: Generate response
         print("🤖 Generating response with Gemini...")
         result = self.generator.generate(query_text, documents)
         print("✅ Response generated")
@@ -107,6 +116,10 @@ class RAGPipeline:
         result["query"] = query_text
         result["category"] = category
         result["documents"] = documents  # Include all documents in result (not just top 5)
+        
+        # Add pre-rerank data if requested
+        if return_pre_rerank and pre_rerank_documents is not None:
+            result["pre_rerank_documents"] = pre_rerank_documents
         
         return result
     
