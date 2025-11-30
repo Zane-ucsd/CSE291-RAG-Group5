@@ -17,7 +17,6 @@ project-phase2/
 ├── tests/                 # 测试文件
 ├── docs/                  # 文档
 ├── data/                  # 数据文件
-├── run_preprocessing.py   # 预处理入口
 ├── validate_ground_truth.py  # 验证入口
 └── requirements.txt       # 依赖包
 ```
@@ -40,11 +39,23 @@ pip install -r requirements.txt
 - OpenAI API Key
 - Gemini API Key
 
-### 3. 运行预处理
+### 3. 处理新的 PDF 文件
+
+系统支持处理单个 PDF 文件或整个目录的 PDF 文件，自动完成 PDF → Markdown → Chunks → Embeddings → PostgreSQL → Elasticsearch 的完整流程。
 
 ```bash
-python run_preprocessing.py --base-dir rag_papers
+# 处理单个 PDF 文件
+python main.py --process-pdf /path/to/file.pdf
+
+# 处理目录中的所有 PDF 文件
+python main.py --process-pdf-dir /path/to/folder
 ```
+
+**功能说明：**
+- 自动检测并跳过重复的 chunks（基于 source + content）
+- 自动导入到 PostgreSQL 和 Elasticsearch
+- 支持处理无类别的 PDF 文件（category 为 None）
+- 单个文件失败不影响其他文件处理
 
 ### 4. 运行测试
 
