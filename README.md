@@ -49,15 +49,22 @@ python run_preprocessing.py --base-dir rag_papers
 ### 4. 运行测试
 
 ```bash
-# 方式1: 从根目录运行（推荐）
+# 方式1: 运行查询 (Run queries only)
 python main.py
 
-# 方式2: 交互式模式
-python main.py interactive
+# 方式2: 运行查询并评估 (Run with evaluation)
+python main.py --evaluate
 
-# 方式3: 直接运行tests/main.py
-python tests/main.py
+# 方式3: 交互式模式 (Interactive mode)
+python main.py interactive
 ```
+
+使用 `--evaluate` 标志时，系统会:
+- 自动加载 `ground_truth_example.json`
+- 计算评估指标 (Precision, Recall, NDCG, MRR 等)
+- 评估 60 个初始检索块 (before reranking)
+- 评估 10 个重排序后的块 (after reranking)
+- 保存结果到 `evaluation_results.json`
 
 ### 5. 验证Ground Truth
 
@@ -70,9 +77,10 @@ python validate_ground_truth.py ground_truth_example.json --check-llm
 - **预处理**: PDF处理、文本分块、数据库初始化
 - **向量化**: OpenAI embeddings生成
 - **检索**: Elasticsearch向量检索和混合检索
-- **重排序**: 交叉编码器重排序
+- **重排序**: 交叉编码器重排序 + 领域过滤 + 分数融合
 - **生成**: Gemini API响应生成
 - **验证**: Ground truth数据验证
+- **评估**: 检索质量评估 (Precision, Recall, NDCG, MRR等)
 
 ## 使用示例
 
