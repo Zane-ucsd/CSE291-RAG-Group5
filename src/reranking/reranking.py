@@ -91,16 +91,16 @@ class Reranker:
         """
         if not documents:
             return []
-        
-        if not self.enabled or not self.model:
-            # Return original order if reranking is disabled
-            return documents[:top_k] if top_k else documents
-        
+
         top_k = top_k or self.rerank_top_k
-        
+
         # Stage 1: Domain filtering (if enabled)
         if self.domain_filter:
             documents = self.domain_filter.boost_documents(query, documents)
+
+        # If CrossEncoder is disabled, return domain-filtered results
+        if not self.enabled or not self.model:
+            return documents[:top_k]
         
         # Store original scores for fusion
         original_scores = [doc.get("score", 0.0) for doc in documents]

@@ -1,15 +1,15 @@
 [
   {
     "query": "What rehabilitation methods are most effective for treating knee injuries in badminton players?",
-    "relevant_ids": ["394", "440", "180", "19", "174", "198", "383", "388", "451", "452", "457", "4", "47", "51", "172", "181", "229", "232", "267", "356", "368", "377", "393", "395", "396", "398", "399", "400", "448", "453", "3", "17", "111", "173", "177", "186", "187", "197", "200", "201", "202", "203", "223", "254", "269", "279", "331", "362", "367", "371", "373", "444", "446", "449", "491", "501", "510", "520"]
+    "relevant_ids": ["440", "174", "172", "377", "362", "452", "451", "254", "267", "198"]
   },
   {
-    "query": "What preventive strategies are most effective in reducing the incidence of common injuries among badminton players, and how can these be tailored to different player levels and playing styles?",
-    "relevant_ids": ["51", "383", "387", "333", "342", "400", "172", "279", "329", "388", "395", "396", "399", "436", "101", "168", "170", "171", "254", "269", "293", "305", "344", "348", "356", "360", "405", "431", "512"]
+    "query": "What are the most effective evidence-based preventive strategies for reducing common injuries in badminton players, including warm-up protocols, neuromuscular training, and technique optimization?",
+    "relevant_ids": ["383", "51", "333", "254", "269", "356", "396", "388", "171", "400"]
   },
   {
     "query": "What are the key factors that influence the recovery time and long-term performance of badminton players after common musculoskeletal injuries?",
-    "relevant_ids": ["374", "377", "17", "368", "2", "51", "63", "73", "101", "283", "319", "321", "323", "356", "383", "4", "18", "19", "21", "47", "48", "67", "80", "95", "172", "229", "250", "252", "253", "254", "259", "268", "269", "294", "322", "333", "358", "360", "362", "378", "382", "384", "385", "400", "409", "414", "430"]
+    "relevant_ids": ["377", "374", "378", "362", "172", "19", "51", "254", "356", "385"]
   },
   {
     "query": "Summarize the risk factors for low-back pain in professional cyclists and preventive core exercises supported by evidence.",
