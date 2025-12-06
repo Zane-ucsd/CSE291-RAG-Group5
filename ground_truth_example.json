@@ -12,44 +12,39 @@
     "relevant_ids": ["377", "374", "378", "362", "172", "19", "51", "254", "356", "385"]
   },
   {
-    "query": "Summarize the risk factors for low-back pain in professional cyclists and preventive core exercises supported by evidence.",
-    "relevant_ids": ["947", "961", "1689", "1690", "869", "870", "848", "850", "934", "951", "1692", "872", "1263", "893", "1124", "1146", "962"]
+    "query": "Explain how improper saddle height and reach contribute to knee and hip overuse injuries.",
+    "relevant_ids": ["1238", "1239", "587", "648", "846", "848", "849", "891", "1241", "655", "885",  "1019", "1110", "947", "1095"]
   },
   {
     "query": "What is runner's knee?",
-    "relevant_ids": ["2181","2459","2457"]
-  },
+    "relevant_ids": ["2181", "2459", "2457"]
+    },
   {
     "query": "How do different types of running shoes (minimalist vs. cushioned) affect tibial stress and injury risk?",
-    "relevant_ids": ["2010","2497","2498","2366"]
-  },
+    "relevant_ids": ["2010", "2497", "2498", "2366"]
+    },
   {
     "query": "An amateur footballer experienced sudden sharp pain in the back of the thigh while sprinting and could not continue running. Based on on-field signs and typical mechanisms, how to recognize a hamstring strain and decide if it's mild or severe?",
-    "relevant_ids": ["2166", "3046", "3193", "3196", "3195", "3199", "3208", "3431", "3484", "3568", "4379"]
-  },
+    "relevant_ids": ["3193", "3196", "3199", "3568", "3195", "3484", "2166", "3431", "3208", "3046", "4379"]
+   },
   {
     "query": "I want to reduce injury risk through warm-up routines. What are the most effective warm-up exercises or programs I can implement each week?",
-    "relevant_ids": ["4013", "4016", "4042", "4049", "4050", "2903", "2905", "2906", "3288", "3291", "3301","3314", "3315", "4053", "4054", "4056", "4059", "4060", "4064", "4065", "2823", "2824", "2826", "2827", "2828", "2832", "2833", "2839", "2835", "2836", "2840", "3599", "3601", "3602", "3603", "3604", "3605", "4116", "3486", "3390"]
+    "relevant_ids": ["4016", "4042", "2903", "3314", "4059", "2823", "2826", "2827", "2832", "2835", "2836", "2840", "3601", "3602", "3603", "3604", "3486"]
   },
   {
     "query": "Our team increased training intensity recently. How can I monitor whether players are at higher risk of injury?",
-    "relevant_ids": ["3511", "3530", "3533", "3760", "3781", "3796", "3798", "3799", "3801", "2886"]
+    "relevant_ids": ["3530", "3799", "3781", "3511", "3533", "3796", "3798", "3801", "2886"]
   },
-      {
-    "query": "Why do breaststroke and freestyle put stress on different body parts, and what drills help protect the knees and lower back?",
-    "relevant_ids": ["4417", "4970", "4984", "4991",
-"5059", "5060", "5061","5062", "5402", "5447", "5460", "5463",
-"5467", "5469", "5476", "5478", "5490", "5493", "5496", "5498", "5500",
-"5515", "5516", "5520", "5521"  ]
+     {
+    "query": "Why do breaststroke and freestyle put stress on different body parts?",
+    "relevant_ids": ["4389", "4336", "5405", "4417", "4337", "5061", "5059", "4994", "5490", "5397", "4339", "4329", "4335", "4328"] 
   },
   {
     "query": "What are the best rehab or strengthening exercises for swimmers coming back from shoulder or back injuries?",
-    "relevant_ids": ["5053", "5054", "5055", "5056", "5059", "5060",
-"5061", "5062", "5064", "5402", "5460", "5463", "5467", "5469", "5476", "5478", "5483", "5484", "5485", "5490", "5493", "5496", "5498", "5500",
-"5515", "5516", "5520", "5521"]
+    "relevant_ids": ["4344", "5516", "4489", "4841", "5521", "4648", "4655", "4724", "5061"]  
   },
   {
     "query": "Why do female swimmers get injured more often, and what can they do in training or nutrition to lower that risk?",
-    "relevant_ids": ["4332","4386", "4388", "4390", "4413", "4414", "4415", "4416", "4420", "4993", "4998", "5293", "5532"]
+    "relevant_ids": ["4415", "4413", "4386", "4414", "5532", "4388", "4332", "4420", "4390", "4998", "5293", "4416", "4993"]
   }
 ]
