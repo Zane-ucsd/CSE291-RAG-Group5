@@ -8,17 +8,16 @@ from typing import Dict, Any
 
 # Elasticsearch Configuration
 ES_CONFIG: Dict[str, Any] = {
-    "host": "https://localhost:9200",
-    "api_key": ("QnbREpoBx8vU1yItlmkz", "T4TzIbNwwlp_LsgNptb53g"),
-    "ca_certs": "C:/Users/12055/OneDrive/Desktop/25Fall/291A Agent/elasticsearch-9.2.0-windows-x86_64/elasticsearch-9.2.0/config/certs/http_ca.crt",
+    "host": "http://localhost:9200",  # ES 8.11.0 via Docker (security disabled for dev)
     "index_name": "sports_kb"
+    # No api_key or ca_certs needed - security disabled in Docker container
 }
 
 # PostgreSQL Configuration
 PG_CONFIG: Dict[str, Any] = {
     "dbname": "sports_injury_rag",
-    "user": "postgres",
-    "password": "170328",
+    "user": "apple",  # Your Mac username
+    "password": "",  # Homebrew PostgreSQL doesn't require password for local connections
     "host": "localhost",
     "port": 5432
 }
@@ -32,7 +31,7 @@ OPENAI_CONFIG: Dict[str, Any] = {
 
 # Gemini Configuration
 GEMINI_CONFIG: Dict[str, Any] = {
-    "api_key": os.getenv("GEMINI_API_KEY", ""),  # Set your Gemini API key
+    "api_key": os.getenv("GEMINI_API_KEY", ""),  # Replace with your actual key
     "model": "gemini-2.0-flash",
     "temperature": 0.7,
     "max_output_tokens": 1000,
@@ -54,9 +53,8 @@ RERANKING_CONFIG: Dict[str, Any] = {
     "rerank_top_k": 10,  # Number of documents to return after reranking
     "model_name": "BAAI/bge-reranker-base",  # Cross-encoder model
     "device": "cpu",  # "cpu" or "cuda"
-    "use_domain_filter": False,  # Enable sports-aware domain filtering
-    "alpha": 1.0,  # Score fusion weight (1.0 = pure CE, 0.7 = 70% CE + 30% original)
-    "batch_size": 32  # Batch size for cross-encoder predictions
+    "use_domain_filter": True,  # Enable sports-aware boosting
+    "alpha": 0.7  # Score fusion: 0.7 = 70% CE + 30% original (1.0 = pure CE)
 }
 
 # Prompt Template Configuration
