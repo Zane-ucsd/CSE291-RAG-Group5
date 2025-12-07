@@ -1,9 +1,12 @@
 """
 Standalone evaluation script for RAG generation results using RAGAS.
 
-This script evaluates the quality of generated responses using RAGAS metrics:
+This script evaluates the quality of generated responses using RAGAS metrics.
+By default, only computes:
 - faithfulness: Measures if the answer is grounded in the provided context
 - answer_relevancy: Measures how relevant the answer is to the question
+
+Optional metrics (not used by default):
 - context_precision: Measures precision of the retrieved context
 - context_recall: Measures recall of the retrieved context (requires ground truth)
 
@@ -11,17 +14,14 @@ Usage:
     python evaluate_generation.py <results_file> [--ground-truth <gt_file>] [--output <output_file>]
     
 Examples:
-    # Basic evaluation without ground truth
+    # Basic evaluation (default: faithfulness and answer_relevancy only)
     python evaluate_generation.py rag_results.json
-    
-    # With ground truth for context_recall metric
-    python evaluate_generation.py rag_results.json --ground-truth ground_truth_example.json
     
     # Save results to file
     python evaluate_generation.py rag_results.json --output generation_evaluation.json
     
-    # Specify metrics to compute
-    python evaluate_generation.py rag_results.json --metrics faithfulness answer_relevancy
+    # Specify metrics to compute (if you want to include context_precision/context_recall)
+    python evaluate_generation.py rag_results.json --metrics faithfulness answer_relevancy context_precision
 """
 
 import json
@@ -63,7 +63,7 @@ def main():
         "--ground-truth",
         type=str,
         default=None,
-        help="Path to ground truth JSON file (optional, for context_recall metric)"
+        help="Path to ground truth JSON file (optional, only needed if using context_recall metric)"
     )
     
     parser.add_argument(
@@ -78,7 +78,7 @@ def main():
         nargs="+",
         choices=["faithfulness", "answer_relevancy", "context_precision", "context_recall"],
         default=None,
-        help="Metrics to compute (default: all available based on ground truth)"
+        help="Metrics to compute (default: faithfulness and answer_relevancy only)"
     )
     
     parser.add_argument(
