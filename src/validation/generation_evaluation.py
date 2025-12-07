@@ -83,8 +83,9 @@ def prepare_evaluation_dataset(
             - query: User query
             - response: Generated response
             - documents: List of retrieved documents with 'content' field
-        ground_truth_data: Optional ground truth data for context_recall metric
+        ground_truth_data: Optional ground truth data (not used by default metrics)
         fetch_gt_content: Whether to fetch actual content for ground truth documents
+            (not needed for default metrics: faithfulness and answer_relevancy)
         
     Returns:
         List of samples formatted for RAGAS evaluation
@@ -178,14 +179,14 @@ def evaluate_generation_results(
     Args:
         results_file: Path to RAG results JSON file
         output_file: Optional path to save evaluation results
-        ground_truth_file: Optional path to ground truth JSON file (for context_recall)
+        ground_truth_file: Optional path to ground truth JSON file (not used by default metrics)
         metrics: List of metrics to compute. Options:
-            - 'faithfulness': Answer grounded in context
-            - 'answer_relevancy': Answer relevance to question
-            - 'context_precision': Precision of retrieved context
-            - 'context_recall': Recall of retrieved context (requires ground truth)
-            If None, uses default metrics based on ground truth availability
-        use_ground_truth: Whether to use ground truth for context_recall
+            - 'faithfulness': Answer grounded in context (default)
+            - 'answer_relevancy': Answer relevance to question (default)
+            - 'context_precision': Precision of retrieved context (not used by default)
+            - 'context_recall': Recall of retrieved context (not used by default, requires ground truth)
+            If None, defaults to ['faithfulness', 'answer_relevancy'] only
+        use_ground_truth: Whether to use ground truth (not used by default metrics)
         
     Returns:
         Dictionary containing evaluation results
@@ -226,20 +227,15 @@ def evaluate_generation_results(
         raise ValueError("No valid samples found in results data")
     
     # Determine metrics to use
-    # Note: context_precision and context_recall require 'reference' (ground truth)
+    # Note: We only use faithfulness and answer_relevancy by default
+    # context_precision and context_recall are not used to reduce evaluation cost and time
     if metrics is None:
-        # Default metrics based on ground truth availability
-        if use_ground_truth and ground_truth_data:
-            # All metrics available with ground truth
-            metrics = ['faithfulness', 'answer_relevancy', 'context_precision', 'context_recall']
-        else:
-            # Only metrics that don't require ground truth
-            metrics = ['faithfulness', 'answer_relevancy']
+        # Default metrics: only faithfulness and answer_relevancy
+        # These metrics don't require ground truth and are sufficient for quality assessment
+        metrics = ['faithfulness', 'answer_relevancy']
     
     # Map metric names to ragas metric objects
-    # Check which samples have reference (ground truth) for metrics that require it
-    has_reference = any('reference' in sample for sample in samples)
-    
+    # Only support faithfulness and answer_relevancy by default
     metric_objects = []
     for metric_name in metrics:
         if metric_name == 'faithfulness':
@@ -247,15 +243,13 @@ def evaluate_generation_results(
         elif metric_name == 'answer_relevancy':
             metric_objects.append(ragas_components['answer_relevancy'])
         elif metric_name == 'context_precision':
-            # context_precision requires 'reference' column
-            if not has_reference:
-                continue
-            metric_objects.append(ragas_components['context_precision'])
+            # context_precision is not used by default (can be enabled explicitly if needed)
+            print(f"⚠️  Warning: context_precision is not enabled by default. Skipping.")
+            continue
         elif metric_name == 'context_recall':
-            # context_recall requires 'reference' column
-            if not has_reference:
-                continue
-            metric_objects.append(ragas_components['context_recall'])
+            # context_recall is not used by default (can be enabled explicitly if needed)
+            print(f"⚠️  Warning: context_recall is not enabled by default. Skipping.")
+            continue
     
     if not metric_objects:
         raise ValueError("No valid metrics selected")
@@ -289,7 +283,7 @@ def evaluate_generation_results(
                 client = OpenAI(api_key=api_key)
                 
                 # Create LangChain OpenAI LLM (RAGAS prefers this format)
-                eval_model = os.getenv("RAGAS_EVAL_MODEL") or os.getenv("OPENAI_MODEL") or "gpt-4o"
+                eval_model = os.getenv("RAGAS_EVAL_MODEL") or os.getenv("OPENAI_MODEL") or "gpt-4o-mini"
                 evaluator_llm = ChatOpenAI(
                     model=eval_model,
                     api_key=api_key,
@@ -299,7 +293,7 @@ def evaluate_generation_results(
                 # langchain_openai not available, try ragas llm_factory
                 try:
                     from ragas.llms import llm_factory  # type: ignore
-                    eval_model = os.getenv("RAGAS_EVAL_MODEL") or os.getenv("OPENAI_MODEL") or "gpt-4o"
+                    eval_model = os.getenv("RAGAS_EVAL_MODEL") or os.getenv("OPENAI_MODEL") or "gpt-4o-mini"
                     evaluator_llm = llm_factory(eval_model, client=client)
                 except Exception:
                     evaluator_llm = None
