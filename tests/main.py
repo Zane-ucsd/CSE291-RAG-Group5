@@ -54,26 +54,165 @@ def main(evaluate=False):
     return_pre_rerank = evaluate_enabled
     
     results = []
+    all_latencies = {
+        "embedding": [],
+        "category_classification": [],
+        "retrieval": [],
+        "reranking": [],
+        "generation": [],
+        "total": []
+    }
+    
+    # Add token tracking
+    all_tokens = {
+        "input_tokens": [],
+        "output_tokens": [],
+        "total_tokens": []
+    }
+    
     for i, query in enumerate(queries, 1):
         print(f"\n{'='*80}")
         print(f"Query {i}/{len(queries)}")
         print(f"{'='*80}")
         
-        # 确保 return_pre_rerank 在 evaluate_enabled 为 True 时生效
-        result = pipeline.query(query, return_pre_rerank=return_pre_rerank) 
-        results.append(result)
+        try:
+            # 确保 return_pre_rerank 在 evaluate_enabled 为 True 时生效
+            result = pipeline.query(query, return_pre_rerank=return_pre_rerank) 
+            results.append(result)
+            
+            # Collect latency data (only if query succeeded)
+            if "latency" in result and "error" not in result:
+                for key in all_latencies.keys():
+                    if key in result["latency"]:
+                        all_latencies[key].append(result["latency"][key])
+            
+            # Collect token data (only if query succeeded)
+            if "error" not in result:
+                if "input_tokens" in result:
+                    all_tokens["input_tokens"].append(result["input_tokens"])
+                if "output_tokens" in result:
+                    all_tokens["output_tokens"].append(result["output_tokens"])
+                if "total_tokens" in result:
+                    all_tokens["total_tokens"].append(result["total_tokens"])
+            
+            # Print results
+            if "error" in result:
+                print(f"\n❌ Error processing query:")
+                print(f"   {result.get('error_message', 'Unknown error')}")
+            else:
+                print(f"\n📝 Response:")
+                print(result["response"])
+                print(f"\n📚 Sources: {', '.join(set(result.get('sources', [])))}")
+                print(f"📊 Retrieved {result.get('num_documents', 0)} documents")
+                
+                # Print latency for this query
+                if "latency" in result:
+                    lat = result["latency"]
+                    print(f"\n⏱️  Latency Breakdown:")
+                    print(f"   - Embedding: {lat.get('embedding', 0):.3f}s")
+                    print(f"   - Category Classification: {lat.get('category_classification', 0):.3f}s")
+                    print(f"   - Retrieval: {lat.get('retrieval', 0):.3f}s")
+                    print(f"   - Reranking: {lat.get('reranking', 0):.3f}s")
+                    print(f"   - Generation: {lat.get('generation', 0):.3f}s")
+                    print(f"   - Total: {lat.get('total', 0):.3f}s")
+                
+                # Print token information for this query
+                if "input_tokens" in result or "output_tokens" in result:
+                    print(f"\n🔢 Token Usage:")
+                    print(f"   - Input Tokens: {result.get('input_tokens', 0)}")
+                    print(f"   - Output Tokens: {result.get('output_tokens', 0)}")
+                    print(f"   - Total Tokens: {result.get('total_tokens', result.get('input_tokens', 0) + result.get('output_tokens', 0))}")
         
-        # Print results
-        print(f"\n📝 Response:")
-        print(result["response"])
-        print(f"\n📚 Sources: {', '.join(set(result['sources']))}")
-        print(f"📊 Retrieved {result['num_documents']} documents")
+        except Exception as e:
+            print(f"\n❌ Unexpected error processing query:")
+            print(f"   {str(e)}")
+            import traceback
+            traceback.print_exc()
+            # Add error result
+            results.append({
+                "query": query,
+                "response": f"Error: {str(e)}",
+                "sources": [],
+                "num_documents": 0,
+                "error": "unexpected_error",
+                "error_message": str(e)
+            })
     
     # Save results
     output_file = "rag_results.json"
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
     print(f"\n✅ Results saved to {output_file}")
+    
+    # Print aggregate latency statistics (only if we have successful queries)
+    if any("latency" in r and "error" not in r for r in results):
+        print("\n" + "="*80)
+        print("⏱️  AGGREGATE LATENCY STATISTICS")
+        print("="*80)
+        
+        def print_latency_stats(name, values):
+            """Print latency statistics for a given stage."""
+            if values:
+                avg = sum(values) / len(values)
+                min_val = min(values)
+                max_val = max(values)
+                print(f"   {name:25s}: Avg={avg:.3f}s, Min={min_val:.3f}s, Max={max_val:.3f}s")
+        
+        print_latency_stats("Embedding", all_latencies["embedding"])
+        print_latency_stats("Category Classification", all_latencies["category_classification"])
+        print_latency_stats("Retrieval", all_latencies["retrieval"])
+        print_latency_stats("Reranking", all_latencies["reranking"])
+        print_latency_stats("Generation", all_latencies["generation"])
+        print_latency_stats("Total Pipeline", all_latencies["total"])
+        
+        # Calculate percentage breakdown
+        if all_latencies["total"]:
+            avg_total = sum(all_latencies["total"]) / len(all_latencies["total"])
+            print(f"\n📊 Time Distribution (Average):")
+            if avg_total > 0:
+                stages = [
+                    ("Embedding", all_latencies["embedding"]),
+                    ("Category Classification", all_latencies["category_classification"]),
+                    ("Retrieval", all_latencies["retrieval"]),
+                    ("Reranking", all_latencies["reranking"]),
+                    ("Generation", all_latencies["generation"])
+                ]
+                for name, values in stages:
+                    if values:
+                        avg_stage = sum(values) / len(values)
+                        percentage = (avg_stage / avg_total) * 100
+                        print(f"   - {name:25s}: {percentage:5.1f}% ({avg_stage:.3f}s)")
+        
+        print("="*80)
+    
+    # Print aggregate token statistics
+    if any("input_tokens" in r and "error" not in r for r in results):
+        print("\n" + "="*80)
+        print("🔢 AGGREGATE TOKEN STATISTICS")
+        print("="*80)
+        
+        def print_token_stats(name, values):
+            """Print token statistics."""
+            if values:
+                avg = sum(values) / len(values)
+                min_val = min(values)
+                max_val = max(values)
+                total = sum(values)
+                print(f"   {name:25s}: Avg={avg:.1f}, Min={min_val}, Max={max_val}, Total={total}")
+        
+        print_token_stats("Input Tokens", all_tokens["input_tokens"])
+        print_token_stats("Output Tokens", all_tokens["output_tokens"])
+        print_token_stats("Total Tokens", all_tokens["total_tokens"])
+        
+        # Calculate token ratio
+        if all_tokens["input_tokens"] and all_tokens["output_tokens"]:
+            avg_input = sum(all_tokens["input_tokens"]) / len(all_tokens["input_tokens"])
+            avg_output = sum(all_tokens["output_tokens"]) / len(all_tokens["output_tokens"])
+            if avg_input > 0:
+                ratio = avg_output / avg_input
+                print(f"\n📊 Token Ratio (Output/Input): {ratio:.2f}")
+        
+        print("="*80)
     
     # Evaluate results if enabled
     # -------------------------------------------------------------
