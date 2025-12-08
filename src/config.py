@@ -25,7 +25,7 @@ PG_CONFIG: Dict[str, Any] = {
 
 # OpenAI Configuration (for embeddings)
 OPENAI_CONFIG: Dict[str, Any] = {
-    "api_key": os.getenv("OPENAI_API_KEY", "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"),# Set your Openai API key
+    "api_key": os.getenv("OPENAI_API_KEY", ""),# Set your Openai API key
     "model": "text-embedding-3-small",
     "embedding_dim": 1536,
     "timeout": 30.0,  # Timeout in seconds
@@ -35,16 +35,16 @@ OPENAI_CONFIG: Dict[str, Any] = {
 
 # Gemini Configuration
 GEMINI_CONFIG: Dict[str, Any] = {
-    "api_key": os.getenv("GEMINI_API_KEY", "AIzaSyD_y5AyM5_YNeFoO1GiZk-kx8rn8wfQo5I"),  # Set your Gemini API key
+    "api_key": os.getenv("GEMINI_API_KEY", ""),  # Set your Gemini API key
     "model": "gemini-2.0-flash",
     "temperature": 0.7,
     "max_output_tokens": 1000,
     "top_p": 0.8,
     "top_k": 40,
-    "timeout": 30.0,  # Timeout in seconds (longer for generation)
+    "timeout": 60.0,  # Timeout in seconds (longer for generation)
     "max_retries": 3,  # Maximum retry attempts
     "retry_delay": 2.0,  # Initial delay between retries in seconds (exponential backoff)
-    "use_multiprocessing": True  # True=进程模式(稳定但慢,超时可靠), False=线程模式(快速但超时在Windows上不可靠)
+    "use_multiprocessing": False  # True=进程模式(稳定但慢,超时可靠), False=线程模式(快速但超时在Windows上不可靠)
 }
 
 # Retrieval Configuration
