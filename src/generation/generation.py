@@ -5,9 +5,16 @@ Handles prompt construction and Gemini API calls.
 
 from typing import List, Dict, Any, Optional
 import time
+import warnings
 import google.generativeai as genai
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
+from multiprocessing import Process, Queue, Manager, TimeoutError as ProcessTimeoutError
+import pickle
 from ..config import GEMINI_CONFIG, PROMPT_CONFIG
 from ..utils import format_context_documents
+
+# Suppress warnings from Google API Core (Python 3.9 compatibility warnings)
+warnings.filterwarnings("ignore", category=FutureWarning, module="google.api_core")
 
 # Try to import tiktoken for token counting, fallback to simple estimation
 try:
@@ -19,6 +26,86 @@ except ImportError:
     def estimate_tokens(text: str) -> int:
         """Simple token estimation (fallback when tiktoken not available)."""
         return len(text) // 4
+
+
+# Module-level functions for multiprocessing (must be at module level for pickle)
+def _gemini_worker_process(api_key: str, model_name: str, prompt: str, gen_config: Dict[str, Any], 
+                           input_tokens_val: int, debug: bool, result_queue: Queue):
+    """
+    Worker function that runs in a separate process for Gemini API calls.
+    Must be at module level for multiprocessing pickle compatibility.
+    
+    Args:
+        api_key: Gemini API key
+        model_name: Model name
+        prompt: Input prompt
+        gen_config: Generation configuration
+        input_tokens_val: Pre-calculated input tokens
+        debug: Whether to enable debug logging
+        result_queue: Queue to put results in
+    """
+    import warnings
+    
+    # Suppress warnings in worker process
+    warnings.filterwarnings("ignore")
+    
+    import google.generativeai as genai
+    import time
+    
+    try:
+        # Re-initialize in the worker process
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel(model_name)
+        
+        result_input_tokens = input_tokens_val
+        result_output_tokens = 0
+        
+        if debug:
+            print("   [DEBUG] Starting API call...")
+        
+        # Call API
+        response = model.generate_content(prompt, generation_config=gen_config)
+        
+        if debug:
+            print("   [DEBUG] API call completed")
+        
+        # Extract response text
+        try:
+            response_text = response.text if hasattr(response, 'text') else str(response)
+        except Exception as e:
+            if debug:
+                print(f"   [DEBUG] Error extracting response.text: {e}")
+            response_text = str(response)
+        
+        if debug:
+            print(f"   [DEBUG] Response text extracted (length: {len(response_text)})")
+        
+        # Get token usage from API response (more accurate and faster than counting)
+        if hasattr(response, 'usage_metadata'):
+            usage = response.usage_metadata
+            if hasattr(usage, 'prompt_token_count'):
+                result_input_tokens = usage.prompt_token_count
+            if hasattr(usage, 'candidates_token_count'):
+                result_output_tokens = usage.candidates_token_count
+            elif hasattr(usage, 'total_token_count'):
+                total = usage.total_token_count
+                result_output_tokens = total - result_input_tokens
+        
+        # Fallback: simple estimation if API doesn't provide token count
+        if result_output_tokens == 0:
+            result_output_tokens = len(response_text) // 4
+        
+        if debug:
+            print(f"   [DEBUG] Tokens: Input={result_input_tokens}, Output={result_output_tokens}")
+        
+        result = {
+            "response": response_text,
+            "input_tokens": result_input_tokens,
+            "output_tokens": result_output_tokens
+        }
+        result_queue.put(("success", result))
+    except Exception as e:
+        result_queue.put(("error", str(e)))
 
 
 class GeminiGenerator:
@@ -43,6 +130,8 @@ class GeminiGenerator:
         self.timeout = GEMINI_CONFIG.get("timeout", 60.0)
         self.max_retries = GEMINI_CONFIG.get("max_retries", 3)
         self.retry_delay = GEMINI_CONFIG.get("retry_delay", 2.0)
+        self.debug_logging = GEMINI_CONFIG.get("debug_logging", False)
+        self.use_multiprocessing = GEMINI_CONFIG.get("use_multiprocessing", True)
         
         if not self.api_key:
             raise ValueError("Gemini API key not found. Set GEMINI_API_KEY environment variable or update config.py")
@@ -156,6 +245,7 @@ Answer based on the context documents above. """
         # Retryable errors (timeout, network, server errors)
         retryable_indicators = [
             "timeout",
+            "timed out",
             "connection",
             "network",
             "500",
@@ -200,8 +290,8 @@ Answer based on the context documents above. """
         # Build prompt
         prompt = self.build_prompt(query, documents, system_instruction, max_context_length)
         
-        # Count input tokens (initialize before retry loop)
-        input_tokens = self.count_tokens(prompt)
+        # Initialize input tokens (will be updated from API response if available)
+        input_tokens = 0
         
         # Configure generation parameters
         generation_config = {
@@ -218,36 +308,117 @@ Answer based on the context documents above. """
             try:
                 start_time = time.time()
                 
-                # Generate response
-                response = self.model.generate_content(
-                    prompt,
-                    generation_config=generation_config
-                )
-                
-                elapsed_time = time.time() - start_time
-                
-                # Warn if approaching timeout
-                if elapsed_time > self.timeout * 0.8:
-                    print(f"⚠️  Generation API call took {elapsed_time:.2f}s (approaching timeout of {self.timeout}s)")
-                
-                # Extract response text
-                response_text = response.text if hasattr(response, 'text') else str(response)
-                
-                # Count output tokens
-                output_tokens = self.count_tokens(response_text)
-                
-                # Try to get token usage from response if available
-                # Gemini API may provide usage_metadata
-                if hasattr(response, 'usage_metadata'):
-                    usage = response.usage_metadata
-                    if hasattr(usage, 'prompt_token_count'):
-                        input_tokens = usage.prompt_token_count
-                    if hasattr(usage, 'candidates_token_count'):
-                        output_tokens = usage.candidates_token_count
-                    elif hasattr(usage, 'total_token_count'):
-                        # If only total is available, estimate output
-                        total = usage.total_token_count
-                        output_tokens = max(output_tokens, total - input_tokens)
+                if self.use_multiprocessing:
+                    # Process mode: Reliable timeout on Windows but slower due to process startup overhead
+                    manager = Manager()
+                    result_queue = manager.Queue()
+                    
+                    process = Process(
+                        target=_gemini_worker_process,
+                        args=(
+                            self.api_key,
+                            self.model_name,
+                            prompt,
+                            generation_config,
+                            input_tokens,
+                            self.debug_logging,
+                            result_queue
+                        )
+                    )
+                    process.start()
+                    
+                    # Wait with timeout
+                    process.join(timeout=self.timeout)
+                    
+                    # Check if process is still alive (timed out)
+                    if process.is_alive():
+                        process.terminate()
+                        process.join(timeout=5)
+                        if process.is_alive():
+                            process.kill()
+                        elapsed = time.time() - start_time
+                        raise TimeoutError(
+                            f"Generation processing timed out after {elapsed:.1f}s "
+                            f"(timeout limit: {self.timeout}s). "
+                            f"The process has been terminated."
+                        )
+                    
+                    # Get result from queue
+                    if not result_queue.empty():
+                        status, result = result_queue.get()
+                        if status == "success":
+                            processed = result
+                        else:
+                            raise RuntimeError(f"Error in worker process: {result}")
+                    else:
+                        elapsed = time.time() - start_time
+                        raise TimeoutError(
+                            f"Generation processing did not return a result after {elapsed:.1f}s "
+                            f"(timeout limit: {self.timeout}s)."
+                        )
+                    
+                    response_text = processed["response"]
+                    input_tokens = processed["input_tokens"]
+                    output_tokens = processed["output_tokens"]
+                else:
+                    # Thread mode: Faster but timeout may not work reliably on Windows for blocking I/O
+                    def _process_response():
+                        """Process response in thread mode."""
+                        result_input_tokens = 0
+                        result_output_tokens = 0
+                        
+                        # Call API
+                        response = self.model.generate_content(
+                            prompt,
+                            generation_config=generation_config
+                        )
+                        
+                        # Extract response text
+                        try:
+                            response_text = response.text if hasattr(response, 'text') else str(response)
+                        except Exception as e:
+                            if self.debug_logging:
+                                print(f"   [DEBUG] Error extracting response.text: {e}")
+                            response_text = str(response)
+                        
+                        # Get token usage from API response
+                        if hasattr(response, 'usage_metadata'):
+                            usage = response.usage_metadata
+                            if hasattr(usage, 'prompt_token_count'):
+                                result_input_tokens = usage.prompt_token_count
+                            if hasattr(usage, 'candidates_token_count'):
+                                result_output_tokens = usage.candidates_token_count
+                            elif hasattr(usage, 'total_token_count'):
+                                total = usage.total_token_count
+                                result_output_tokens = total - result_input_tokens
+                        
+                        # Fallback: simple estimation if API doesn't provide token count
+                        if result_output_tokens == 0:
+                            result_output_tokens = len(response_text) // 4
+                        
+                        return {
+                            "response": response_text,
+                            "input_tokens": result_input_tokens,
+                            "output_tokens": result_output_tokens
+                        }
+                    
+                    # Execute with thread timeout (may not work reliably on Windows)
+                    with ThreadPoolExecutor(max_workers=1) as executor:
+                        future = executor.submit(_process_response)
+                        try:
+                            processed = future.result(timeout=self.timeout)
+                        except FutureTimeoutError:
+                            future.cancel()
+                            elapsed = time.time() - start_time
+                            raise TimeoutError(
+                                f"Generation processing timed out after {elapsed:.1f}s "
+                                f"(timeout limit: {self.timeout}s). "
+                                f"Note: Thread timeout may not work reliably on Windows for blocking I/O."
+                            )
+                    
+                    response_text = processed["response"]
+                    input_tokens = processed["input_tokens"]
+                    output_tokens = processed["output_tokens"]
                 
                 # Extract sources if available
                 sources = []
@@ -264,6 +435,35 @@ Answer based on the context documents above. """
                     "total_tokens": input_tokens + output_tokens
                 }
             
+            except (TimeoutError, FutureTimeoutError) as e:
+                # Handle timeout specifically
+                last_exception = e
+                try:
+                    elapsed = time.time() - start_time
+                except:
+                    elapsed = 0
+                error_msg = str(e) if str(e) else f"Request timed out after {self.timeout}s"
+                print(f"⏱️  Timeout error: {error_msg}")
+                print(f"   Elapsed time: {elapsed:.1f}s, Timeout limit: {self.timeout}s")
+                # Timeout is retryable
+                if attempt < self.max_retries - 1:
+                    wait_time = self.retry_delay * (2 ** attempt)
+                    print(f"   Retrying in {wait_time:.1f}s...")
+                    time.sleep(wait_time)
+                else:
+                    print(f"❌ Generation API call failed after {self.max_retries} attempts: {error_msg}")
+                    return {
+                        "response": f"Error generating response: {error_msg}. The generation process exceeded the timeout limit of {self.timeout}s. This may indicate network issues or the API response processing is stuck.",
+                        "sources": [],
+                        "num_documents": len(documents),
+                        "prompt_length": len(prompt),
+                        "input_tokens": input_tokens,
+                        "output_tokens": 0,
+                        "total_tokens": input_tokens,
+                        "error": error_msg,
+                        "error_source": "Timeout",
+                        "elapsed_time": elapsed
+                    }
             except Exception as e:
                 last_exception = e
                 error_msg = str(e)
@@ -349,19 +549,42 @@ Answer based on the context documents above. """
             "top_k": self.top_k
         }
         
+        start_time = time.time()
         try:
-            response = self.model.generate_content(
-                prompt,
-                generation_config=generation_config,
-                stream=True
-            )
+            # Use ThreadPoolExecutor to enforce timeout for initial connection
+            def _generate_stream():
+                """Helper function to run generate_content in a separate thread."""
+                return self.model.generate_content(
+                    prompt,
+                    generation_config=generation_config,
+                    stream=True
+                )
             
+            # Execute with timeout for initial connection
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(_generate_stream)
+                try:
+                    response = future.result(timeout=self.timeout)
+                except FutureTimeoutError:
+                    future.cancel()
+                    yield f"Error: Request timed out after {self.timeout}s"
+                    return
+            
+            # Stream chunks with timeout check
             for chunk in response:
+                # Check if we've exceeded timeout during streaming
+                elapsed = time.time() - start_time
+                if elapsed > self.timeout:
+                    yield f"\n[Error: Streaming timed out after {self.timeout}s]"
+                    break
+                
                 if hasattr(chunk, 'text'):
                     yield chunk.text
                 else:
                     yield str(chunk)
         
+        except (TimeoutError, FutureTimeoutError) as e:
+            yield f"Error: Request timed out after {self.timeout}s"
         except Exception as e:
             yield f"Error: {str(e)}"
 

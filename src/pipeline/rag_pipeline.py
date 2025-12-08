@@ -242,3 +242,47 @@ class RAGPipeline:
             "generation_model": "gemini-2.0-flash"  # From GEMINI_CONFIG
         }
 
+    def batch_query(
+        self,
+        queries: List[str],
+        max_workers: int = 12,
+        **kwargs: Any
+    ) -> List[Dict[str, Any]]:
+        """
+        Run multiple queries concurrently.
+        When generation uses multiprocessing, this keeps overall throughput high.
+
+        Args:
+            queries: List of user queries.
+            max_workers: Max parallel workers (default 12).
+            **kwargs: Extra params forwarded to `query` (e.g., top_k, rerank_top_k).
+
+        Returns:
+            List of results in the same order as input queries.
+        """
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        if not queries:
+            return []
+
+        worker_count = min(max_workers, len(queries))
+        results: List[Optional[Dict[str, Any]]] = [None] * len(queries)
+
+        with ThreadPoolExecutor(max_workers=worker_count) as executor:
+            future_to_idx = {
+                executor.submit(self.query, q, **kwargs): idx
+                for idx, q in enumerate(queries)
+            }
+            for future in as_completed(future_to_idx):
+                idx = future_to_idx[future]
+                try:
+                    results[idx] = future.result()
+                except Exception as e:
+                    # Return an error entry but keep order aligned
+                    results[idx] = {
+                        "query": queries[idx],
+                        "error": str(e)
+                    }
+
+        return results  # type: ignore
+
