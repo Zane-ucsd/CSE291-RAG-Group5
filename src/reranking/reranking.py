@@ -58,7 +58,7 @@ class Reranker:
         try:
             from sentence_transformers import CrossEncoder
             self.model = CrossEncoder(self.model_name, device=self.device)
-            print(f"✅ Reranker model loaded: {self.model_name}")
+            print(f"✅ Reranker model loaded: {self.model_name} (device: {self.device})")
         except ImportError:
             print("⚠️  sentence-transformers not installed. Reranking disabled.")
             print("   Install with: pip install sentence-transformers")
