@@ -6,6 +6,23 @@ Centralized configuration management for all components.
 import os
 from typing import Dict, Any
 
+
+def _get_device() -> str:
+    """
+    Automatically detect and return the best available device.
+    Returns "cuda" if GPU is available, otherwise "cpu".
+    
+    Returns:
+        Device string ("cuda" or "cpu")
+    """
+    try:
+        import torch
+        if torch.cuda.is_available():
+            return "cuda"
+    except ImportError:
+        pass
+    return "cpu"
+
 # Elasticsearch Configuration
 ES_CONFIG: Dict[str, Any] = {
     "host": "https://localhost:9200",
@@ -49,39 +66,24 @@ GEMINI_CONFIG: Dict[str, Any] = {
 
 # Retrieval Configuration
 RETRIEVAL_CONFIG: Dict[str, Any] = {
-    "top_k": 30,
+    "top_k": 60,
     "num_candidates": 1000,
-    "use_hybrid": False,  # Use hybrid search (vector + BM25)
-    "category_filter": True  # Enable category-based filtering
+    "use_hybrid": True,  # Use hybrid search (vector + BM25)
+    "category_filter": False  # Enable category-based filtering
 }
 
 # Reranking Configuration
 RERANKING_CONFIG: Dict[str, Any] = {
     "enabled": True,
-    "rerank_top_k": 3,  # Number of documents to return after reranking
+    "rerank_top_k": 10,  # Number of documents to return after reranking
     "model_name": "BAAI/bge-reranker-base",  # Cross-encoder model
-    "device": "cpu",  # "cpu" or "cuda"
+    "device": _get_device(),  # Automatically detect: "cuda" if GPU available, else "cpu"
     "use_domain_filter": False,  # Enable sports-aware domain filtering
     "alpha": 1.0,  # Score fusion weight (1.0 = pure CE, 0.7 = 70% CE + 30% original)
     "batch_size": 32  # Batch size for cross-encoder predictions
 }
 
 # Prompt Template Configuration
-
-
-PROMPT_CONFIG: Dict[str, Any] = {
-    "system_instruction": """
-You are a helpful assistant specialized in sports injury knowledge. 
-Answer questions based on the provided context documents. 
-If the context doesn't contain enough information, say so clearly. 
-Always cite relevant information from the context when possible.
-""",
-    "max_context_length": 8000,  # Maximum characters from retrieved documents
-    "include_sources": True      # Include source information in the response
-}
-
-
-
 # PROMPT_CONFIG: Dict[str, Any] = {
 #     "system_instruction": """
 # You are an expert assistant in sports injury science (sports medicine, biomechanics, prevention, rehabilitation).
@@ -141,6 +143,19 @@ Always cite relevant information from the context when possible.
 #     "max_context_length": 8000,
 #     "include_sources": True
 # }
+
+
+PROMPT_CONFIG: Dict[str, Any] = {
+    "system_instruction": """
+You are a helpful assistant specialized in sports injury knowledge. 
+Answer questions based on the provided context documents. 
+If the context doesn't contain enough information, say so clearly. 
+Always cite relevant information from the context when possible.
+""",
+    "max_context_length": 8000,  # Maximum characters from retrieved documents
+    "include_sources": True      # Include source information in the response
+}
+
 
 # Data Processing Configuration
 DATA_CONFIG: Dict[str, Any] = {
