@@ -139,7 +139,11 @@ def main(evaluate=False):
             })
     
     # Save results
-    output_file = "rag_results.json"
+    # Ensure results directory exists
+    results_dir = Path("results")
+    results_dir.mkdir(exist_ok=True)
+    
+    output_file = "results/rag_results.json"
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
     print(f"\n✅ Results saved to {output_file}")
@@ -220,7 +224,7 @@ def main(evaluate=False):
     # -------------------------------------------------------------
     
     if evaluate_enabled:
-        ground_truth_file = "ground_truth_example.json"
+        ground_truth_file = "results/ground_truth_example.json"
         use_ground_truth = os.path.exists(ground_truth_file)
         
         print("\n" + "="*80)
@@ -238,7 +242,7 @@ def main(evaluate=False):
                 # Evaluate after reranking (final results)
                 evaluation_result_after = evaluator.evaluate_retrieval_results(
                     results_file=output_file,
-                    output_file="evaluation_report_after_rerank.json"
+                    output_file="results/evaluation_report_after_rerank.json"
                 )
                 
                 # Print summary report
@@ -268,7 +272,7 @@ def main(evaluate=False):
                         try:
                             evaluation_result_before = evaluator.evaluate_retrieval_results(
                                 results_file=temp_file,
-                                output_file="evaluation_report_before_rerank.json"
+                                output_file="results/evaluation_report_before_rerank.json"
                             )
                             
                             # Compare key metrics
@@ -295,7 +299,7 @@ def main(evaluate=False):
                                 pass
                 
                 print(f"\n✅ Retrieval evaluation completed")
-                print(f"   Files: evaluation_report_after_rerank.json, evaluation_report_before_rerank.json")
+                print(f"   Files: results/evaluation_report_after_rerank.json, results/evaluation_report_before_rerank.json")
                 
             except ImportError as e:
                 print(f"⚠️  Retrieval evaluation skipped: {e}")
@@ -314,13 +318,13 @@ def main(evaluate=False):
             print("\n[2/2] Evaluating generation results with RAGAS...")
             eval_result = evaluate_generation_results(
                 results_file=output_file,
-                output_file="generation_evaluation.json",
+                output_file="results/generation_evaluation.json",
                 ground_truth_file=ground_truth_file if use_ground_truth else None,
                 use_ground_truth=use_ground_truth
             )
             
             print(f"\n✅ RAGAS evaluation completed")
-            print(f"   File: generation_evaluation.json")
+            print(f"   File: results/generation_evaluation.json")
             
         except ImportError as e:
             print(f"⚠️  RAGAS evaluation skipped: {e}")
