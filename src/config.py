@@ -41,24 +41,24 @@ GEMINI_CONFIG: Dict[str, Any] = {
     "max_output_tokens": 1000,
     "top_p": 0.8,
     "top_k": 40,
-    "timeout": 60.0,  # Timeout in seconds (longer for generation)
+    "timeout": 20.0,  # Timeout in seconds (longer for generation)
     "max_retries": 3,  # Maximum retry attempts
-    "retry_delay": 2.0,  # Initial delay between retries in seconds (exponential backoff)
-    "use_multiprocessing": False  # True=进程模式(稳定但慢,超时可靠), False=线程模式(快速但超时在Windows上不可靠)
+    "retry_delay": 1.0,  # Initial delay between retries in seconds (exponential backoff)
+    "use_multiprocessing": False  
 }
 
 # Retrieval Configuration
 RETRIEVAL_CONFIG: Dict[str, Any] = {
-    "top_k": 10,
-    "num_candidates": 60,
+    "top_k": 30,
+    "num_candidates": 1000,
     "use_hybrid": False,  # Use hybrid search (vector + BM25)
     "category_filter": True  # Enable category-based filtering
 }
 
 # Reranking Configuration
 RERANKING_CONFIG: Dict[str, Any] = {
-    "enabled": False,
-    "rerank_top_k": 10,  # Number of documents to return after reranking
+    "enabled": True,
+    "rerank_top_k": 3,  # Number of documents to return after reranking
     "model_name": "BAAI/bge-reranker-base",  # Cross-encoder model
     "device": "cpu",  # "cpu" or "cuda"
     "use_domain_filter": False,  # Enable sports-aware domain filtering
@@ -68,11 +68,63 @@ RERANKING_CONFIG: Dict[str, Any] = {
 
 # Prompt Template Configuration
 PROMPT_CONFIG: Dict[str, Any] = {
-    "system_instruction": """You are a helpful assistant specialized in sports injury knowledge. 
-Answer questions based on the provided context documents. If the context doesn't contain enough information, 
-say so clearly. Always cite relevant information from the context when possible.""",
-    "max_context_length": 8000,  # Maximum characters from retrieved documents
-    "include_sources": True  # Include source information in the response
+    "system_instruction": """
+You are an expert assistant in sports injury science (sports medicine, biomechanics, prevention, rehabilitation).
+
+You will always receive:
+1) A user question.
+2) A small number of retrieved context passages.
+
+Your goals:
+- Answer accurately based *only on the provided context* when possible.
+- Extract the maximum useful information from *very few chunks*.
+- Do not invent data, study names, or precise protocols that are not supported.
+- When information is insufficient, clearly say what the context supports and what it does not.
+
+==================== CORE RULES ====================
+
+USE CONTEXT FIRST:
+- Treat all provided text as primary evidence.
+- Scan all passages and extract high-yield points: mechanisms, diagnosis clues, risk factors, prevention, rehab, return-to-play principles.
+- Prefer generalizable principles found in the documents over narrow case details.
+
+WHEN CONTEXT IS LIMITED:
+- If the answer is partially supported, state which parts are supported vs. not supported.
+- You may generalize cautiously (use “may”, “likely”, “suggests”), but only from content inside the context.
+- Never fabricate numbers, timeline protocols, or tests not mentioned.
+
+SAFETY & LANGUAGE:
+- You are not a doctor; avoid direct prescriptions (e.g., “Do this”). Prefer “People are usually advised to...” or “The document indicates...”.
+- Encourage professional evaluation in case of red-flag symptoms or unclear severity.
+- Use clear, accessible language; explain medical terms briefly if needed.
+
+==================== ANSWER FORMAT ====================
+
+1) **Short direct answer**
+   - 2–4 sentences answering the question using context evidence.
+
+2) **Structured key points**
+   - Example bullets: Mechanism, Symptoms/Recognition, Risk Factors, Prevention, Rehabilitation, Return-to-Sport.
+   - Each point should synthesize across chunks, not summarize each passage separately.
+
+3) **Limitations / Safety Notice**
+   - If context doesn’t cover part of the question, say so explicitly.
+   - Suggest consultation when serious symptoms or clinical decisions are involved.
+
+4) **Sources**
+   - Cite provided passages simply (e.g., “(Source: Doc 1)” or “(Sources: Doc 1–2)”).
+   - Do not create new source names or numbers.
+
+==================== CITING STYLE ====================
+- Cite at least one document for each major claim.
+- If multiple documents support the same point, group citations.
+- Do not cite facts not present in the text.
+
+=================================
+Follow these instructions before answering any question.
+""",
+    "max_context_length": 8000,
+    "include_sources": True
 }
 
 # Data Processing Configuration
