@@ -59,7 +59,7 @@ CSE291-RAG-Group5/
 | **Validation** | Ground truth data validation and consistency checking | - |
 | **Evaluation** | Retrieval quality evaluation (Precision, Recall, NDCG, MRR, etc.) and RAGAS generation evaluation | ragas |
 
-## Prerequisites
+## 📋 Prerequisites
 
 Before starting, ensure you have the following services installed and running:
 
@@ -143,7 +143,7 @@ curl http://localhost:9200  # If no authentication
 2. Update `ES_CONFIG` in `src/config.py` with your credentials
 3. Update `ca_certs` path to your certificate file location
 
-## Quick Start
+## 🚀 Quick Start
 
 ### 1. Install Dependencies
 
@@ -287,7 +287,7 @@ The system uses a two-stage reranking strategy to improve retrieval quality:
 
 **Configuration**: Reranking parameters can be adjusted in `RERANKING_CONFIG` in `src/config.py`. The reranking model will be automatically downloaded on first use (~1GB).
 
-## Evaluation System
+## 📊 Evaluation System
 
 The project provides evaluation for both retrieval quality and generation quality.
 
