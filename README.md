@@ -157,6 +157,8 @@ pip install -r requirements.txt
 - OpenAI API key for embeddings
 - Gemini API key for generation
 
+**Important**: It is recommended to install the GPU version of PyTorch corresponding to your system, otherwise the reranking speed may be significantly reduced. You can install the GPU version of PyTorch from the [official PyTorch website](https://pytorch.org/get-started/locally/) based on your CUDA version.
+
 ### 2. Setup Database and Import Data
 
 #### 2.1 Configure Database Connections
