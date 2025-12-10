@@ -47,6 +47,102 @@ CSE291-RAG-Group5/
 └── requirements.txt       # Python dependencies
 ```
 
+## 🔧 Core Module Description
+
+| Module | Function | Technology Stack |
+|--------|----------|------------------|
+| **Preprocessing** | PDF to Markdown, text chunking, database initialization | docling, langchain-text-splitters |
+| **Embedding** | Generate vector representations for documents and queries | OpenAI text-embedding-3-small |
+| **Retrieval** | Elasticsearch hybrid search (vector + BM25) | Elasticsearch 8.x |
+| **Reranking** | Two-stage reranking: domain filtering + cross-encoder + score fusion | BAAI/bge-reranker-base |
+| **Generation** | Answer generation based on retrieved results | Google Gemini 2.0 Flash |
+| **Validation** | Ground truth data validation and consistency checking | - |
+| **Evaluation** | Retrieval quality evaluation (Precision, Recall, NDCG, MRR, etc.) and RAGAS generation evaluation | ragas |
+
+## Prerequisites
+
+Before starting, ensure you have the following services installed and running:
+
+### PostgreSQL with pgvector Extension
+
+**Installation:**
+
+```bash
+# macOS (using Homebrew)
+brew install postgresql@16  # PostgreSQL 11+ required, 16 recommended
+brew services start postgresql@16
+brew install pgvector  # Install pgvector extension
+
+# Linux (Ubuntu/Debian)
+sudo apt-get install postgresql postgresql-contrib  # Install PostgreSQL
+sudo apt-get install postgresql-16-pgvector  # Install pgvector extension for PostgreSQL 16
+```
+
+**Enable pgvector extension in PostgreSQL:**
+
+```bash
+# Connect to your database
+psql -U your_username -d your_database
+
+# Enable extension
+CREATE EXTENSION IF NOT EXISTS vector;
+```
+
+**Verify installation:**
+
+```bash
+# Check PostgreSQL is running
+pg_isready
+
+# Verify pgvector extension
+psql -U your_username -d your_database -c "SELECT * FROM pg_extension WHERE extname = 'vector';"
+```
+
+### Elasticsearch 8.x or 9.x
+
+**Installation:**
+
+```bash
+# macOS (using Homebrew)
+brew install elasticsearch
+brew services start elasticsearch
+
+# Linux (Ubuntu/Debian)
+wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.11.0-amd64.deb
+sudo dpkg -i elasticsearch-8.11.0-amd64.deb
+sudo systemctl start elasticsearch
+sudo systemctl enable elasticsearch
+```
+
+**Configure Elasticsearch Connection:**
+
+The project uses HTTPS to connect to Elasticsearch. You need to configure the certificate path:
+
+1. **Find your Elasticsearch certificate path:**
+   - macOS (Homebrew): Usually in `/usr/local/var/lib/elasticsearch/config/certs/http_ca.crt` or your Elasticsearch installation directory
+   - Linux: Usually in `/etc/elasticsearch/certs/http_ca.crt` or your Elasticsearch installation directory
+   - Or check your Elasticsearch installation directory: `elasticsearch_directory/config/certs/http_ca.crt`
+
+2. **Update `src/config.py`:**
+   - Set `ES_CONFIG["ca_certs"]` to your certificate file path (e.g., `/path/to/elasticsearch/config/certs/http_ca.crt`)
+   - Update `ES_CONFIG["api_key"]` with your Elasticsearch API key (if authentication is enabled)
+
+**Verify installation:**
+
+```bash
+# Check Elasticsearch is running
+curl -k https://localhost:9200 -u "elastic:your_password"  # If password enabled
+# or
+curl http://localhost:9200  # If no authentication
+
+# Should return cluster information
+```
+
+**Note**: If Elasticsearch uses authentication, you'll need to:
+1. Get the API key from Elasticsearch (or use username/password)
+2. Update `ES_CONFIG` in `src/config.py` with your credentials
+3. Update `ca_certs` path to your certificate file location
+
 ## Quick Start
 
 ### 1. Install Dependencies
@@ -61,15 +157,55 @@ pip install -r requirements.txt
 - OpenAI API key for embeddings
 - Gemini API key for generation
 
-### 2. Configuration
+### 2. Setup Database and Import Data
+
+#### 2.1 Configure Database Connections
+
+Before importing data, configure basic database connection information in `src/config.py`:
+- **PostgreSQL connection**: `dbname`, `user`, `password`, `host`, `port`
+- **Elasticsearch connection**: `host`, `api_key`, `ca_certs`
+
+#### 2.2 Import SQL Data to PostgreSQL
+
+Ensure PostgreSQL is running and create the database (if it doesn't exist):
+
+```bash
+# Create database (if needed)
+createdb new_vector_db
+
+# Import the SQL dump file
+psql -U your_username -d new_vector_db -f data/new_vector_db_dump_clean.sql
+```
+
+**Note**: 
+- Replace `your_username` with your PostgreSQL username
+- The SQL file includes database schema with `pgvector` extension, pre-processed knowledge base data with embeddings, and all necessary tables and indexes
+- If you need to set a password, use: `psql -U your_username -d new_vector_db -W -f data/new_vector_db_dump_clean.sql`
+
+#### 2.3 Import Data to Elasticsearch
+
+After importing to PostgreSQL, import the data to Elasticsearch:
+
+You can run this as a one-liner:
+
+```bash
+python -c "from src.preprocessing.preprocessing import DataPreprocessor; p = DataPreprocessor(); p.create_es_index(force_recreate=True); p.import_from_postgres_to_elasticsearch()"
+```
+
+**Note**: 
+- Make sure Elasticsearch is running before importing
+- The import process may take a few minutes
+- Ensure your Elasticsearch connection settings in `src/config.py` are correct
+
+### 3. Configuration
 
 Edit `src/config.py` to set:
-- PostgreSQL connection information
-- Elasticsearch connection information
-- OpenAI API Key
-- Gemini API Key
+- **PostgreSQL connection information** (if not already set in step 2)
+- **Elasticsearch connection information** (if not already set in step 2)
+- **OpenAI API Key** (required for embeddings)
+- **Gemini API Key** (required for generation)
 
-### 3. Process New PDF Files
+### 4. Process New PDF Files (Optional)
 
 The system supports processing single PDF files or entire directories, automatically completing the full pipeline: PDF → Markdown → Chunks → Embeddings → PostgreSQL → Elasticsearch.
 
@@ -87,7 +223,7 @@ python main.py --process-pdf-dir /path/to/folder
 - Supports processing PDFs without category (category set to None)
 - Individual file failures do not affect processing of other files
 
-### 4. Run RAG Pipeline
+### 5. Run RAG Pipeline
 
 #### Method 1: Standard Mode (Run Preset Queries)
 
@@ -137,121 +273,43 @@ When using the `--evaluate` flag, the system will:
    - `evaluation_report_before_rerank.json`: Retrieval evaluation (before reranking)
    - `generation_evaluation.json`: RAGAS generation evaluation
 
-### 5. Validate Ground Truth
+### 6. Validate Ground Truth
 
 ```bash
 python validate_ground_truth.py results/ground_truth_example.json --check-llm
 ```
 
+## 🔄 Reranking System
+
+The system uses a two-stage reranking strategy to improve retrieval quality:
+1. **Domain Filtering** (optional): Boosts documents matching the query's sport category
+2. **Cross-Encoder Reranking**: Uses deep semantic model (`BAAI/bge-reranker-base`) for precise ranking
+
+**Configuration**: Reranking parameters can be adjusted in `RERANKING_CONFIG` in `src/config.py`. The reranking model will be automatically downloaded on first use (~1GB).
+
 ## Evaluation System
 
-The project provides a complete evaluation system, including generation result evaluation and retrieval quality evaluation.
+The project provides evaluation for both retrieval quality and generation quality.
 
-### 1. Generation Result Evaluation (RAGAS)
-
-Uses RAGAS (Retrieval-Augmented Generation Assessment) to evaluate the quality of generated responses.
-
-#### Prerequisites
+### Running Evaluation
 
 ```bash
-# Install RAGAS (if not already installed)
-pip install ragas
-```
-
-#### Quick Usage
-
-```bash
-# Method 1: Automatic evaluation in main pipeline (recommended)
+# Run full evaluation (retrieval + generation)
 python main.py --evaluate
-
-# Method 2: Use standalone evaluation script
-python evaluate_generation.py results/rag_results.json
-
-# Method 3: Use environment variable (for tests/main.py)
-export EVALUATE_WITH_RAGAS=true  # Linux/Mac
-# or
-$env:EVALUATE_WITH_RAGAS="true"  # Windows PowerShell
-python tests/main.py
 ```
 
-#### Evaluation Metrics
+This will generate evaluation reports in the `results/` directory:
+- `rag_results.json`: Complete query results
+- `evaluation_report_after_rerank.json`: Retrieval metrics (Precision@K, Recall@K, NDCG@K, MRR)
+- `generation_evaluation.json`: RAGAS metrics (Faithfulness, Answer Relevancy)
 
-- **Faithfulness**: Evaluates whether the answer is grounded in the provided context without fabrication (0-1, higher is better)
-- **Answer Relevancy**: Evaluates how relevant the answer is to the question (0-1, higher is better)
-- **Context Precision**: Evaluates the precision of retrieved context (requires ground truth)
-- **Context Recall**: Evaluates the recall of retrieved context (requires ground truth)
+**Requirements**:
+- `results/ground_truth_example.json` must exist for retrieval evaluation
+- `ragas` package must be installed for generation evaluation (already in `requirements.txt`)
 
-#### Full Evaluation (All Metrics)
+### Ground Truth Format
 
-```bash
-python evaluate_generation.py results/rag_results.json \
-    --ground-truth results/ground_truth_example.json \
-    --use-ground-truth \
-    --output results/generation_evaluation.json
-```
-
-### 2. Retrieval Quality Evaluation
-
-Evaluates the quality of the retrieval stage (ES retrieval and Reranking), including before/after reranking comparison.
-
-#### Usage
-
-```bash
-# Automatic evaluation in main pipeline (recommended)
-python main.py --evaluate
-
-# Or use standalone script
-python evaluate_retrieval.py results/rag_results.json \
-    --ground-truth results/ground_truth_example.json \
-    --output results/evaluation_report.json
-```
-
-#### Evaluation Metrics
-
-- **Precision@K**: Proportion of relevant documents in top K results
-- **Recall@K**: Proportion of retrieved relevant documents out of all relevant documents
-- **NDCG@K**: Normalized Discounted Cumulative Gain, considering ranking quality
-- **MRR**: Mean Reciprocal Rank, position of first relevant document
-
-#### Reranking Effect Comparison
-
-Evaluation automatically compares before/after reranking effects, showing:
-- **Precision@1**: Relevance of first document (main improvement point of reranking)
-- **MRR**: Average position of first relevant document
-- **NDCG@10**: Ranking quality improvement
-
-### 3. Evaluation Result Files
-
-After running `python main.py --evaluate`, the following files are generated in the `results/` directory:
-
-| File Name | Description | Content |
-|-----------|-------------|---------|
-| `rag_results.json` | Query results | Complete results for all queries (answers, sources, documents, etc.) |
-| `evaluation_report_after_rerank.json` | Retrieval evaluation (after reranking) | Evaluation metrics for final retrieval results (Precision, Recall, NDCG, MRR, etc.) |
-| `evaluation_report_before_rerank.json` | Retrieval evaluation (before reranking) | Evaluation metrics for initial ES retrieval results (if available) |
-| `generation_evaluation.json` | RAGAS generation evaluation | Quality evaluation of generated answers (Faithfulness, Answer Relevancy, etc.) |
-
-**Note**:
-- `evaluation_report_before_rerank.json` is only generated if results contain `pre_rerank_documents` field
-- `generation_evaluation.json` is only generated if `ragas` package is installed
-- If `ground_truth_example.json` does not exist, retrieval evaluation will be skipped
-
-### 4. Evaluation Configuration
-
-#### Environment Variables
-
-```bash
-# Enable RAGAS evaluation
-export EVALUATE_WITH_RAGAS=true
-
-# Specify evaluation model (default: gpt-4o)
-export RAGAS_EVAL_MODEL=gpt-4o
-export OPENAI_API_KEY=your-api-key
-```
-
-#### Ground Truth Format
-
-`ground_truth_example.json` format:
+`results/ground_truth_example.json` should contain:
 
 ```json
 [
@@ -262,73 +320,17 @@ export OPENAI_API_KEY=your-api-key
 ]
 ```
 
-### 5. Evaluation Result Interpretation
+### Evaluation Metrics
 
-#### RAGAS Score Reference
+**Retrieval Metrics**: Precision@K, Recall@K, NDCG@K, MRR (higher is better, 0-1 scale)
 
-- **0.9-1.0**: Excellent ✅
-- **0.7-0.9**: Good ⚠️
-- **0.5-0.7**: Needs Improvement ❌
-- **< 0.5**: Critical Issues 🚨
+**RAGAS Metrics**: Faithfulness, Answer Relevancy (higher is better, 0-1 scale)
+- 0.9-1.0: Excellent ✅
+- 0.7-0.9: Good ⚠️
+- < 0.7: Needs Improvement ❌
 
-#### Retrieval Metrics Explanation
 
-- **Precision@10**: If 0.4, means 4 out of top 10 documents are relevant
-- **Recall@10**: If 0.2, means 20% of relevant documents were retrieved
-- **NDCG@10**: Ranking-aware metric, higher means relevant documents are ranked higher
-- **MRR**: If 0.67, means average first relevant document is at position 1.5
-
-For detailed evaluation methods, see the Evaluation System section above.
-
-## 🔧 Core Module Description
-
-| Module | Function | Technology Stack |
-|--------|----------|------------------|
-| **Preprocessing** | PDF to Markdown, text chunking, database initialization | docling, langchain-text-splitters |
-| **Embedding** | Generate vector representations for documents and queries | OpenAI text-embedding-3-small |
-| **Retrieval** | Elasticsearch hybrid search (vector + BM25) | Elasticsearch 8.x |
-| **Reranking** | Cross-encoder reranking + domain filtering + score fusion | BAAI/bge-reranker-base |
-| **Generation** | Answer generation based on retrieved results | Google Gemini 2.0 Flash |
-| **Validation** | Ground truth data validation and consistency checking | - |
-| **Evaluation** | Retrieval quality evaluation (Precision, Recall, NDCG, MRR, etc.) and RAGAS generation evaluation | ragas |
-
-### Reranking Features
-
-The system uses a two-stage reranking strategy:
-
-1. **Domain Filtering** (optional): Based on query sport category, boost matching category documents by 1.25x
-2. **Cross-Encoder Reranking**: Use deep semantic model for precise ranking
-3. **Score Fusion**: Fuse cross-encoder scores with original retrieval scores (default: 70% CE + 30% original)
-
-Reranking parameters can be configured in `RERANKING_CONFIG` in `src/config.py`.
-
-## 💻 Usage Examples
-
-### Python Code Example
-
-```python
-from src.pipeline import RAGPipeline
-
-# Initialize Pipeline
-pipeline = RAGPipeline()
-
-# Execute query
-result = pipeline.query(
-    "What rehabilitation methods are most effective for treating knee injuries in badminton players?"
-)
-
-# View results
-print("Answer:", result["response"])
-print("Sources:", result["sources"])
-print("Number of documents:", result["num_documents"])
-print("Category:", result.get("category", "N/A"))
-
-# View retrieved documents
-for doc in result["documents"]:
-    print(f"Document ID: {doc['id']}, Score: {doc.get('score', 'N/A')}")
-```
-
-### Command Line Examples
+## 💻 Command Line Examples
 
 ```bash
 # 1. Process new PDF file
@@ -348,25 +350,6 @@ python evaluate_retrieval.py results/rag_results.json --ground-truth results/gro
 python evaluate_generation.py results/rag_results.json --ground-truth results/ground_truth_example.json
 ```
 
-## 📊 Evaluation Metrics Explanation
-
-### Retrieval Evaluation Metrics
-
-- **Precision@K**: Proportion of relevant documents in top K results
-- **Recall@K**: Proportion of retrieved relevant documents out of all relevant documents
-- **NDCG@K**: Normalized Discounted Cumulative Gain, considering ranking quality (0-1, higher is better)
-- **MRR**: Mean Reciprocal Rank, position of first relevant document (0-1, higher is better)
-- **MAP**: Mean Average Precision, comprehensive consideration of ranking and relevance
-
-### RAGAS Generation Evaluation Metrics
-
-- **Faithfulness**: Whether answer is based on context without fabrication (0-1, higher is better)
-- **Answer Relevancy**: How relevant the answer is to the question (0-1, higher is better)
-- **Context Precision**: Proportion of relevant parts in retrieved context (requires ground truth)
-- **Context Recall**: How well retrieved context covers ground truth (requires ground truth)
-
-All metrics are explained in the Evaluation System section above.
-
 ## ⚠️ Important Notes
 
 1. **Configuration Requirements**:
@@ -385,5 +368,5 @@ All metrics are explained in the Evaluation System section above.
    - It is recommended to backup important results before running
 
 4. **Performance Optimization**:
-   - Reranking stage significantly improves retrieval quality but increases latency
-   - Reranking parameters can be adjusted in `RERANKING_CONFIG` in `src/config.py`
+   - Reranking stage significantly improves retrieval quality but increases latency (~100-500ms)
+   - See the Reranking System section above for detailed configuration and performance tuning options
