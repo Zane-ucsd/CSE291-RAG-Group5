@@ -789,7 +789,7 @@ class PreprocessingPipeline:
         self.db_init.create_tables()
         
         # Use "general" as default category for PDF processing (folder structure)
-        # But save as None in database for new PDFs
+        # Ensure category is not None for database (NOT NULL constraint)
         pdf_category = category or "general"
         
         # Step 1: Process PDF to markdown and chunks
@@ -800,8 +800,9 @@ class PreprocessingPipeline:
             return 0
         
         # Step 2: Generate embeddings and save to database
+        # Use pdf_category (with "general" default) instead of category (may be None)
         source = Path(pdf_path).name
-        num_saved = self.process_and_save_chunks(chunks, category, source)
+        num_saved = self.process_and_save_chunks(chunks, pdf_category, source)
         
         # Step 3: Auto-import to Elasticsearch if enabled
         if self.auto_import_to_es and num_saved > 0:
