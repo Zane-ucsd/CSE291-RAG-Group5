@@ -26,16 +26,16 @@ def _get_device() -> str:
 # Elasticsearch Configuration
 ES_CONFIG: Dict[str, Any] = {
     "host": "https://localhost:9200",
-    "api_key": ("QnbREpoBx8vU1yItlmkz", "T4TzIbNwwlp_LsgNptb53g"),
-    "ca_certs": "C:/Users/12055/OneDrive/Desktop/25Fall/291A Agent/elasticsearch-9.2.0-windows-x86_64/elasticsearch-9.2.0/config/certs/http_ca.crt",
+    #"api_key": ("<your elasticsearch api key>", "<your elasticsearch api key secret>"),
+    #"ca_certs": " path to your elasticsearch certificate",
     "index_name": "sports_kb"
 }
 
 # PostgreSQL Configuration
 PG_CONFIG: Dict[str, Any] = {
     "dbname": "sports_injury_rag",
-    "user": "postgres",
-    "password": "170328",
+    "user": "", # Set your PostgreSQL username
+    "password": "", # Set your PostgreSQL password
     "host": "localhost",
     "port": 5432
 }
