@@ -592,7 +592,7 @@ class DatabaseInitializer:
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS knowledge_base (
                     id SERIAL PRIMARY KEY,
-                    category VARCHAR(50) NOT NULL,
+                    category VARCHAR(50),
                     content TEXT NOT NULL,
                     embedding vector(1536),
                     source VARCHAR(200)
@@ -657,16 +657,13 @@ class PreprocessingPipeline:
         
         Args:
             chunks: List of text chunks
-            category: Sport category (defaults to "general" if None)
+            category: Sport category (can be None for new PDFs)
             source: PDF source filename
             batch_size: Batch size for embedding generation
             
         Returns:
             Number of chunks saved
         """
-        # Use "general" as default category if None
-        category = category or "general"
-        
         db_name = self.pg_config["dbname"]
         conn = psycopg2.connect(
             dbname=db_name,
@@ -774,24 +771,26 @@ class PreprocessingPipeline:
         
         Args:
             pdf_path: Path to PDF file
-            category: Sport category (optional, defaults to "general" for new PDFs)
+            category: Sport category (optional, defaults to None for new PDFs)
             
         Returns:
             Number of chunks created and saved
         """
         print(f"\n{'='*70}")
         print(f"Processing: {Path(pdf_path).name}")
-        display_category = category or "general"
-        print(f"   Category: {display_category}")
+        if category:
+            print(f"   Category: {category}")
+        else:
+            print(f"   Category: None (new PDF)")
         print(f"{'='*70}")
         
         # Ensure database and tables exist
         self.db_init.create_database()
         self.db_init.create_tables()
         
-        # Use "general" as default category for PDF processing (folder structure and database)
+        # Use "general" as default category for PDF processing (folder structure)
+        # But save as None in database for new PDFs
         pdf_category = category or "general"
-        db_category = category or "general"  # Ensure database category is never None
         
         # Step 1: Process PDF to markdown and chunks
         _, chunks = self.pdf_processor.process_pdf(pdf_path, pdf_category)
@@ -802,7 +801,7 @@ class PreprocessingPipeline:
         
         # Step 2: Generate embeddings and save to database
         source = Path(pdf_path).name
-        num_saved = self.process_and_save_chunks(chunks, db_category, source)
+        num_saved = self.process_and_save_chunks(chunks, category, source)
         
         # Step 3: Auto-import to Elasticsearch if enabled
         if self.auto_import_to_es and num_saved > 0:
